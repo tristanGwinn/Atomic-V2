@@ -1,3 +1,39 @@
+/** 
+ * 
+ * 45434A VEX Atomic Framework and Codebase
+ * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
+ * 
+ * Date Updated: 8/15/26
+ * Updated By: Tristan Gwinn
+ * 
+ * ToDo: 
+ * 	It's okay to reference old code and other templates/frameworks to implement features
+ *  - Generic PID class
+ *  - Odometry
+ *    - IMU, tracking wheels, etc
+ *  - Turn to face point
+ *  - Turn to face heading
+ *  - Swing to face point
+ *  - Swing to face heading
+ *  - RAMSETE trajectory following
+ *  - Semi-spontanious RAMSETE trajectory generation
+ *  - Move to Pose via boomerang
+ *  - Path Following via pure pursuit
+ *  - Motion Chaining
+ *  - Driver Control
+ *    - Expo drive curves
+ *    - Smooth deadzone compensation
+ *    - Minimum output
+ *    - Arcade control (single or double stick)
+ *    - turn-steer prioritization
+ * 
+ * 	
+ * What's New:
+ *	- Created project files + Github repo.
+ * 
+ * 
+ */
+
 #include "main.h"
 
 /**
