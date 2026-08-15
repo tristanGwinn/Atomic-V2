@@ -1,7 +1,7 @@
 # Atomic_26-27
 
 ## Description
-This project helps users manage tasks efficiently.
+The VEX V5RC PROS codebase and designed for and by team 45434A Atomic for the 2026-2027 Override VEX season.
 
 ### ToDo
 A lot currently needs implemented. Right now we are aiming for a basic framework to build the following tools. The goal is a system like LemLib or EZ that we can better control, document, and modify.
