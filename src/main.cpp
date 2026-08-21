@@ -3,128 +3,62 @@
  * 45434A VEX Atomic Framework and Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 8/15/26
+ * Date Updated: 8/21/26
  * Updated By: Tristan Gwinn
+ * 
+ * Note:
+ * 	As of now, nothing has been tested,
+ *  and some functionality may be broken/or unintentionally left unfinished.
  * 
  * ToDo: 
  * 	It's okay to reference old code and other templates/frameworks to implement features
- *  - Generic PID class
- *  - Odometry
- *    - IMU, tracking wheels, etc
- *  - Turn to face point
- *  - Turn to face heading
- *  - Swing to face point
- *  - Swing to face heading
- *  - RAMSETE trajectory following
- *  - Semi-spontanious RAMSETE trajectory generation
- *  - Move to Pose via boomerang
- *  - Path Following via pure pursuit
- *  - Motion Chaining
- *  - Driver Control
- *    - Expo drive curves
- *    - Smooth deadzone compensation
- *    - Minimum output
- *    - Arcade control (single or double stick)
- *    - turn-steer prioritization
- * 
+ *  - Realtime motion-profiled trajectory generation
+ *  - Trajectory formatting
+ * 	- The Ramsete path follow cannot currently read paths
+ *  - Add simple movement logic
+ * 		- Turn to face point
+ *  	- Move to Pose via boomerang
+ *  	- Turn to face heading
+ *  	- Swing to face point
+ *  	- Swing to face heading
+ * 	- Many files need to be consistently formatted and organized
+ * 	- Create a formatting guide
+ * 	- Driver control recording/playback
  * 	
  * What's New:
- *	- Created project files + Github repo.
- * 
+ * 	- Many features were brought over from lemlib, examples below
+ *  	- Chassis class
+ * 		- Motion handler
+ * 		- Units
+ * 		- PID class
+ * 		- Pose class
+ * 	- Ramsete controller (untested)
+ * 	- Trajectory following is partially implemented
+ * 	- Logo can display on brainscreen
  * 
  */
 
 #include "main.h"
+#include "subsystems.hpp"
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+bool logoOnBrain = false;
+LV_IMAGE_DECLARE(logo);
 
-/**
- * Runs initialization code. This occurs as soon as the program is started.
- *
- * All other competition modes are blocked by initialize; it is recommended
- * to keep execution time for this mode under a few seconds.
- */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	if (logoOnBrain){
+		lv_obj_t *img = lv_image_create(lv_screen_active());
+		lv_image_set_src(img, &logo);
+		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+	}
 
-	pros::lcd::register_btn1_cb(on_center_button);
+
+
 }
 
-/**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
- */
 void disabled() {}
 
-/**
- * Runs after initialize(), and before autonomous when connected to the Field
- * Management System or the VEX Competition Switch. This is intended for
- * competition-specific initialization routines, such as an autonomous selector
- * on the LCD.
- *
- * This task will exit when the robot is enabled and autonomous or opcontrol
- * starts.
- */
 void competition_initialize() {}
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
 void autonomous() {}
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
-void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::MotorGroup left_mg({1, -2, 3});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
-	pros::MotorGroup right_mg({-4, 5, -6});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
-
-
-	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
-
-		// Arcade control scheme
-		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
-		int turn = master.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-		left_mg.move(dir - turn);                      // Sets left motor voltage
-		right_mg.move(dir + turn);                     // Sets right motor voltage
-		pros::delay(20);                               // Run for 20 ms then update
-	}
-}
+void opcontrol() {}
