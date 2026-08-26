@@ -44,16 +44,16 @@ DriveVelocities RamseteController::calculate(
     double k =
         2.0 * m_zeta * std::sqrt(std::pow(omegaRef, 2) + m_b * std::pow(vRef, 2));
 
-    LinearVelocity v = mps * (vRef * cos(m_poseError.theta) + k * eX);
+    LinearVelocity v = (vRef * cos(m_poseError.theta) + k * eX) * mps;
     AngularVelocity omega = (omegaRef + k * eTheta +
-                           m_b * vRef * sinc(eTheta) * eY) * radps;
+                             m_b * vRef * sinc(eTheta) * eY) * radps;
     return DriveVelocities{v, omega};
 }
 
 DriveVelocities RamseteController::calculate(
         const Pose& currentPose, const Trajectory::State& desiredState) {
-    return calculate(currentPose, desiredState.pose, desiredState.velocity,
-                    (desiredState.velocity/mps * desiredState.curvature/radpm) * radps);
+    return calculate(currentPose, desiredState.pose,
+                     desiredState.linearVelocity, desiredState.angularVelocity);
 }
 
 void RamseteController::setEnabled(bool enabled) {

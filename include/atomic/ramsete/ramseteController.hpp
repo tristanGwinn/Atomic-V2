@@ -2,23 +2,11 @@
 
 // function is based on the VPI adaptation of the WPIlib implementation.
 #include "atomic/pose.hpp"
-#include "atomic/ramsete/trajectory.h"
+#include "atomic/trajectory/trajectory.h"
 #include "units/units.hpp"
 #include "units/Angle.hpp"
 
 namespace atomic{
-
-/**
- * This structure type will hold the output velocities
- * 
- * TODO: look into background movement system, and document this.
- * May want to move this somewhere else, depending on how the lemlib movements work
- * 
- */
-struct DriveVelocities {
-    LinearVelocity v = 0_mps;
-    AngularVelocity omega = 0_rps;
-};
 
 class RamseteController {
     public:

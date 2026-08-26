@@ -946,3 +946,32 @@ toAngular(Quantity<typename Q::mass,
                               typename Q::luminosity,
                               typename Q::moles>>(linear / (diameter / 2.0));
 }
+
+template<isQuantity Q>
+constexpr Quantity<typename Q::mass,
+                   typename Q::angle,
+                   typename Q::time,
+                   typename Q::current,
+                   typename Q::length,
+                   typename Q::temperature,
+                   typename Q::luminosity,
+                   typename Q::moles>
+toAngularVelocity(Quantity<typename Q::mass,
+                   typename Q::length,
+                   typename Q::time,
+                   typename Q::current,
+                   typename Q::angle,
+                   typename Q::temperature,
+                   typename Q::luminosity,
+                   typename Q::moles> linear,
+          Curvature curvature) {
+    return unit_cast<Quantity<typename Q::mass,
+                              typename Q::angle,
+                              typename Q::time,
+                              typename Q::current,
+                              typename Q::length,
+                              typename Q::temperature,
+                              typename Q::luminosity,
+                              typename Q::moles>>(linear * curvature);
+}
+

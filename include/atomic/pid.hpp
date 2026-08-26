@@ -1,6 +1,20 @@
 #pragma once
 
 namespace atomic {
+
+/**
+ * @brief Struct to hold PID gains.
+ *
+ * @param kP proportional gain
+ * @param kI integral gain
+ * @param kD derivative gain
+ */
+struct Gains {
+        Number kP = 0;
+        Number kI = 0;
+        Number kD = 0;
+};
+
 class PID {
     public:
         /**
@@ -11,66 +25,84 @@ class PID {
          * @param kD derivative gain
          * @param windupRange integral anti windup range
          * @param signFlipReset whether to reset integral when sign of error flips
-         *
-         * @b Example
-         * @code {.cpp}
-         * // create a PID
-         * PID pid(5, // kP
-         *         0.01, // kI
-         *         20, // kD
-         *         5, // integral anti windup range
-         *         false); // don't reset integral when sign of error flips
-         * @endcode
          */
-        PID(float kP, float kI, float kD, float windupRange = 0, bool signFlipReset = false);
+        PID(Number kP, Number kI, Number kD, Number windupRange = 0, bool signFlipReset = false);
 
         /**
-         * @brief Update the PID
+         * @brief Constructs a new PID controller
          *
-         * @param error target minus position - AKA error
-         * @return float output
-         *
-         * @b Example
-         * @code {.cpp}
-         * void opcontrol() {
-         *     // create a PID
-         *     PID pid(5, 0, 20);
-         *     // give the pid a test input
-         *     // the pid will then return an output
-         *     float output = pid.update(10);
-         * }
-         * @endcode
+         * @param gains the gains to use
+         * @param windupRange range at which integral is reset
+         * @param signFlipReset whether to reset integral when error changes sign
          */
-        float update(float error);
+        PID(const Gains& gains, Number windupRange = 0, bool signFlipReset = false);
 
         /**
-         * @brief reset integral, derivative, and prevTime
+         * @brief Get the current gains
          *
-         * @b Example
-         * @code {.cpp}
-         * void opcontrol() {
-         *     // create a PID
-         *     PID pid(5, 0, 20);
-         *     // give the pid a test input
-         *     // the pid will then return an output
-         *     float output = pid.update(10);
-         *     // reset the pid
-         *     pid.reset();
-         * }
-         * @endcode
+         * @return Gains the current gains
+         */
+        Gains getGains();
+
+        /**
+         * @brief Set the new gains
+         *
+         * @param gains the new gains
+         */
+        void setGains(Gains gains);
+
+        /**
+         * @brief Updates the PID controller using a given error, and outputs the next control signal.
+         *
+         * @param error the error from the setpoint. Error is calculated as setpoint - current
+         * @return Number the control signal (output)
+         */
+        Number update(Number error);
+
+        /**
+         * @brief Resets the integral and derivative values of the PID controller.
          */
         void reset();
-    protected:
-        // gains
-        const float kP;
-        const float kI;
-        const float kD;
 
-        // optimizations
-        const float windupRange;
-        const bool signFlipReset;
+        /**
+         * @brief Change whether the integral is reset when the error changes sign
+         *
+         * @param signFlipReset whether to reset the integral when the error changes sign
+         */
+        void setSignFlipReset(bool signFlipReset);
 
-        float integral = 0;
-        float prevError = 0;
+        /**
+         * @brief Get the sign flip reset value
+         *
+         * @return true
+         * @return false
+         */
+        bool getSignFlipReset();
+
+        /**
+         * @brief Set the windup range
+         *
+         * @param windupRange the new windup range
+         */
+        void setWindupRange(Number windupRange);
+
+        /**
+         * @brief Get the windup range
+         *
+         * @return Number
+         */
+        Number getWindupRange();
+
+    private:
+        Gains m_gains;
+
+        bool m_signFlipReset;
+        Number m_windupRange;
+
+        Number m_previousError = 0;
+        Number m_integral = 0;
+
+        std::optional<Time> m_previousTime = std::nullopt;
 };
+
 } // namespace atomic

@@ -5,79 +5,78 @@
 #include "pros/adi.hpp"
 #include "pros/rotation.hpp"
 
+#include "units/units.hpp"
+#include "units/Angle.hpp"
+
 namespace atomic {
-    class TrackingWheel {
+
+class TrackingWheel {
     public:
         /**
          * @brief Create a new tracking wheel
          *
-         * @param encoder the optical shaft encoder to use
-         * @param wheelDiameter the diameter of the wheel
-         * @param distance distance between the tracking wheel and the center of rotation in inches
-         * @param gearRatio gear ratio of the tracking wheel, defaults to 1
-         *
+         * @param encoder the encoder to use for tracking
+         * @param diameter the diameter of the wheel
+         * @param offset distance between the tracking wheel and the center of rotation in inches
+         * @param ratio gear ratio of the tracking wheel, defaults to 1
          */
-        TrackingWheel(pros::adi::Encoder* encoder, float wheelDiameter, float distance, float gearRatio = 1);
+        TrackingWheel(Encoder* encoder, Length diameter, Length distance, Number ratio = 1);
         
         /**
          * @brief Create a new tracking wheel
          *
-         * @param encoder the v5 rotation sensor to use
-         * @param wheelDiameter the diameter of the wheel
-         * @param distance distance between the tracking wheel and the center of rotation in inches
-         * @param gearRatio gear ratio of the tracking wheel, defaults to 1
-         *
+         * @param port the v5 rotation sensor to use
+         * @param diameter the diameter of the wheel
+         * @param offset distance between the tracking wheel and the center of rotation in inches
+         * @param ratio gear ratio of the tracking wheel, defaults to 1
          */
-        TrackingWheel(pros::Rotation* encoder, float wheelDiameter, float distance, float gearRatio = 1);
+        TrackingWheel(ReversibleSmartPort port, Length diameter, Length offset, Number ratio = 1);
         
         /**
-         * @brief Create a new tracking wheel
+         * @brief reset the tracking wheel encoder
          *
-         * @param motors the motor group to use
-         * @param wheelDiameter the diameter of the wheel
-         * @param distance half the track width of the drivetrain in inches
-         * @param rpm theoretical maximum rpm of the drivetrain wheels
+         * Since the internal encoder object is abstract, it's not known what values errno may be
+         * set to in case of a failure.
          *
+         * @return INT_MAX an error has occurred, possibly setting errno
          */
-        TrackingWheel(pros::MotorGroup* motors, float wheelDiameter, float distance, float rpm);
-        
+        int reset();
+
         /**
-         * @brief Reset the tracking wheel position to 0
+         * @brief Get the distance traveled by the tracking wheel since this function was last called.
+         * This function is not thread safe.
          *
+         * It is recommended to set the angle of the encoder to 0 before starting to use this function.
+         *
+         * Since the internal encoder object is abstract, it's not known what values errno may be
+         * set to in case of a failure.
+         *
+         * @return INFINITY an error has occurred, possibly setting errno
+         * @return Length the distance the tracking wheel has traveled since the last time
+         * the function was called
          */
-        void reset();
+        Length getDistanceDelta();
 
         /**
          * @brief Get the distance traveled by the tracking wheel
          *
          * @return float distance traveled in inches
-         *
          */
-        float getDistanceTraveled();
+        Length getDistanceTraveled();
 
         /**
          * @brief Get the offset of the tracking wheel from the center of rotation
          *
          * @return float offset in inches
-         *
          */
-        float getOffset();
-        
-        /**
-         * @brief Get the type of tracking wheel
-         *
-         * @return int - 1 if motor group, 0 otherwise
-         *
-         */
-        int getType();
-    
+        Length getOffset();
+
     private:
-        float diameter;
-        float distance;
-        float rpm;
-        pros::adi::Encoder* encoder = nullptr;
-        pros::Rotation* rotation = nullptr;
-        pros::MotorGroup* motors = nullptr;
-        float gearRatio = 1;
+        Encoder* m_encoder;
+        Length m_diameter;
+        Length m_offset;
+        Number m_ratio;
+        Length m_lastTotal;
 };
+
 }   // atomic
