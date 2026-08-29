@@ -1,10 +1,10 @@
 #pragma once
 
 // function is based on the VPI adaptation of the WPIlib implementation.
-#include "atomic/pose.hpp"
 #include "atomic/trajectory/trajectory.h"
 #include "units/units.hpp"
 #include "units/Angle.hpp"
+#include "atomic/util.hpp"
 
 namespace atomic{
 
@@ -19,7 +19,7 @@ class RamseteController {
          *             more damping in response.
          * 
          */
-        RamseteController(double b, double zeta);
+        RamseteController(Number b, Number zeta);
 
         /** 
          * @note Construct a Ramsete unicycle controller. The default arguments for
@@ -42,7 +42,7 @@ class RamseteController {
          * @param poseTolerance Pose error which is tolerable
          * 
          */
-        void setTolerance(const Pose& poseTolerance);
+        void setTolerance(const units::Pose& poseTolerance);
 
         /**
          * @brief Returns the next Controller output
@@ -56,7 +56,7 @@ class RamseteController {
          * @param angularVelocityRef the desired angular velocity
          * 
          */
-        DriveVelocities calculate(const Pose& currentPose, const Pose& poseRef,
+        DriveVelocities calculate(const units::Pose& currentPose, const units::Pose& poseRef,
                                 LinearVelocity linearVelocityRef,
                                 AngularVelocity angularVelocityRef);
 
@@ -71,7 +71,7 @@ class RamseteController {
          *                     from a trajectory.
          * 
          */
-        DriveVelocities calculate(const Pose& currentPose,
+        DriveVelocities calculate(const units::Pose& currentPose,
                                 const Trajectory::State& desiredState);
 
         /**
@@ -82,11 +82,11 @@ class RamseteController {
         void setEnabled(bool enabled);
 
     private:
-        double m_b;
-        double m_zeta;
+        Number m_b;
+        Number m_zeta;
 
-        Pose m_poseError = Pose(0, 0, 0);
-        Pose m_poseTolerance = Pose(0, 0, 0);
+        units::Pose m_poseError;
+        units::Pose m_poseTolerance;
         bool m_enabled = true;
 };
 

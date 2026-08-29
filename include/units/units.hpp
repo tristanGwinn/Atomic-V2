@@ -480,7 +480,7 @@ constexpr bool operator>=(const Q& lhs, const R& rhs)
 
 template<isQuantity Q, isQuantity R>
 constexpr bool operator<(const Q& lhs, const R& rhs)
-    requires Isomorphic<Q, R>
+    // requires Isomorphic<Q, R>
 {
     return (lhs.internal() < rhs.internal());
 }

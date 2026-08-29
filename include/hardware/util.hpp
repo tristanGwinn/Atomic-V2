@@ -2,9 +2,6 @@
 
 #include <climits>
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 /**
  * @brief Convert a PROS function return to a standard return

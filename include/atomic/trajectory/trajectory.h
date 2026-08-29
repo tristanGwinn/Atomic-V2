@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "atomic/pose.hpp"
+#include "units/Pose.hpp"
 #include "units/units.hpp"
 #include "units/Angle.hpp"
 
@@ -108,7 +108,7 @@ class Trajectory {
          *             that the current trajectory will be transformed into
          * @return the transformed trajectory
          */
-        Trajectory relativeTo(const Pose& pose);
+        Trajectory relativeTo(const units::Pose& pose);
 
         /**
          * @brief Concatenates another trajectory to the current trajectory.

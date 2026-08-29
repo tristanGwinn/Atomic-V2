@@ -4,9 +4,6 @@
 #include "hardware/IMU/IMU.hpp"
 #include "pros/imu.hpp"
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 class V5InertialSensor : public IMU {
     public:

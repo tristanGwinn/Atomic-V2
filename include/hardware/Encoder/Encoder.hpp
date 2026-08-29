@@ -3,9 +3,6 @@
 #include "hardware/Device.hpp"
 #include "units/Angle.hpp"
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 /**
  * @brief abstract class for encoders

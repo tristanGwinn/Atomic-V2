@@ -1,5 +1,3 @@
-#pragma once
-
 #include "atomic/trajectory/path.hpp"
 // #include "units/Vector2D.hpp"
 
@@ -27,7 +25,7 @@ units::V2Position CubicBezier::getPoint(Time t) {
 
     auto result = (T * this->matCoefficients) * this->points;
 
-    return {result(0), result(1)};
+    return {result(0) * m, result(1) * m};
 }
 
 units::V2Velocity CubicBezier::getDerivative(Time t) {
@@ -35,10 +33,10 @@ units::V2Velocity CubicBezier::getDerivative(Time t) {
     Eigen::Matrix<double, 1, 3> T;
     T << t_num * t_num, t_num, 1;
 
-    Eigen::Matrix<LinearVelocity, 1, 2> result =
+    Eigen::Matrix<double, 1, 2> result =
         T * this->derivativeCoefficients * this->points;
 
-    return {result(0), result(1)};
+    return {result(0) * mps, result(1) * mps};
 }
 
 units::V2Acceleration CubicBezier::getSecondDerivative(Time t) {
@@ -46,10 +44,10 @@ units::V2Acceleration CubicBezier::getSecondDerivative(Time t) {
     Eigen::Matrix<double, 1, 2> T;
     T << t_num, 1;
 
-    Eigen::Matrix<LinearAcceleration, 1, 2> result =
+    Eigen::Matrix<double, 1, 2> result =
         T * this->secondDerivativeCoefficients * this->points;
 
-    return {result(0), result(1)};
+    return {result(0) * mps2, result(1) * mps2};
 }
 
 Time CubicBezier::GetMaxT() const { return 1.0_sec; }

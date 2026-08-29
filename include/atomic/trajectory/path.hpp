@@ -37,11 +37,11 @@ class CubicBezier : public Path {
         Time GetMaxT() const override;
 
     private:
-        Eigen::Matrix<Number, 4, 2> points;
+        Eigen::Matrix<double, 4, 2> points;
 
-        Eigen::Matrix<Number, 4, 4> matCoefficients;
-        Eigen::Matrix<Number, 3, 4> derivativeCoefficients;
-        Eigen::Matrix<Number, 2, 4> secondDerivativeCoefficients;
+        Eigen::Matrix<double, 4, 4> matCoefficients;
+        Eigen::Matrix<double, 3, 4> derivativeCoefficients;
+        Eigen::Matrix<double, 2, 4> secondDerivativeCoefficients;
 };
 
 class MultiPath : public Path {

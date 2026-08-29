@@ -4,9 +4,6 @@
 #include "hardware/Port.hpp"
 #include "pros/rotation.hpp"
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 /**
  * @brief Encoder implementation for the V5 Rotation sensor

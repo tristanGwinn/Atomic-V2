@@ -1,5 +1,8 @@
 #pragma once
 
+#include "units/units.hpp"
+#include <optional>
+
 namespace atomic {
 
 /**

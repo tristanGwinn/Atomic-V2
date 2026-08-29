@@ -1,14 +1,12 @@
-#pragma once
-
 #include "atomic/ramsete/ramseteController.hpp"
 #include "atomic/util.hpp"
 
 #include <cmath>
 #include <math.h>
 
-using namespace atomic;
+namespace atomic {
 
-RamseteController::RamseteController(double b, double zeta)
+RamseteController::RamseteController(Number b, Number zeta)
     : m_b{b}, m_zeta{zeta} {}
 
 bool RamseteController::atReference() const {
@@ -16,46 +14,48 @@ bool RamseteController::atReference() const {
     const auto& tolerance = m_poseTolerance;
     return std::fabs(error.x < tolerance.x) &&
         std::fabs(error.y < tolerance.y) &&
-        std::fabs(deg_to_rad(error.theta)) < deg_to_rad(tolerance.theta);
+        std::fabs(error.orientation.convert(rad)) < tolerance.orientation.convert(rad);
 }
 
-void RamseteController::setTolerance(const Pose& poseTolerance) {
+void RamseteController::setTolerance(const units::Pose& poseTolerance) {
     m_poseTolerance = poseTolerance;
 }
 
 DriveVelocities RamseteController::calculate(
-        const Pose& currentPose, const Pose& poseRef,
+        const units::Pose& currentPose, const units::Pose& poseRef,
         LinearVelocity linearVelocityRef,
         AngularVelocity angularVelocityRef) {
     if (!m_enabled) {
         return DriveVelocities{linearVelocityRef, angularVelocityRef};
     }
 
-    m_poseError = Pose(poseRef.x - currentPose.x,
+    m_poseError = units::Pose(poseRef.x - currentPose.x,
                        poseRef.y - currentPose.y,
-                       poseRef.theta - currentPose.theta);
+                       poseRef.orientation - currentPose.orientation);
 
-    double eX = m_poseError.x;
-    double eY = m_poseError.y;
-    double eTheta = deg_to_rad(m_poseError.theta);
-    double vRef = linearVelocityRef.convert(mps);
-    double omegaRef = angularVelocityRef.convert(radps);
+    Length eX = m_poseError.x;
+    Length eY = m_poseError.y;
+    Angle eTheta = m_poseError.orientation;
+    LinearVelocity vRef = linearVelocityRef;
+    AngularVelocity omegaRef = angularVelocityRef;
 
-    double k =
-        2.0 * m_zeta * std::sqrt(std::pow(omegaRef, 2) + m_b * std::pow(vRef, 2));
+    Number k =
+        2.0 * m_zeta * units::sqrt((omegaRef * omegaRef).internal() + m_b * (vRef * vRef).internal());
 
-    LinearVelocity v = (vRef * cos(m_poseError.theta) + k * eX) * mps;
-    AngularVelocity omega = (omegaRef + k * eTheta +
-                             m_b * vRef * sinc(eTheta) * eY) * radps;
+    LinearVelocity v = mps * (vRef.internal() * units::cos(m_poseError.orientation) + k * eX.internal());
+    AngularVelocity omega = radps * (omegaRef.internal() + k * eTheta.internal() +
+                                     m_b * vRef.internal() * atomic::sinc(eTheta.internal()) * eY.internal());
     return DriveVelocities{v, omega};
 }
 
 DriveVelocities RamseteController::calculate(
-        const Pose& currentPose, const Trajectory::State& desiredState) {
-    return calculate(currentPose, desiredState.pose,
-                     desiredState.linearVelocity, desiredState.angularVelocity);
+        const units::Pose& currentPose, const Trajectory::State& desiredState) {
+    return calculate(currentPose, desiredState.pose, desiredState.linearVelocity, desiredState.angularVelocity);
 }
 
 void RamseteController::setEnabled(bool enabled) {
     m_enabled = enabled;
 }
+
+
+}   // namespace atomic

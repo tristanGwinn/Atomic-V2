@@ -5,9 +5,6 @@
 #include "pros/adi.hpp"
 #include "pros/rtos.hpp"
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 /**
  * @brief Encoder implementation for the Optical Shaft Encoder

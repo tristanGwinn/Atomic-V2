@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <vector>
-#include "atomic/pose.hpp"
 #include "atomic/MotionHandler.hpp"
 
 /**
@@ -85,8 +84,7 @@ DriveOutputs desaturate(Number lateralOutput, Number angularOutput);
 Number slew(Number target, Number current, Number maxChangeRate, Time deltaTime,
             SlewDirection restrictDirection = SlewDirection::ALL);
 
-
-Curvature atomic::getSignedTangentArcCurvature(units::Pose start, units::V2Position end);
+Curvature getSignedTangentArcCurvature(units::Pose start, units::V2Position end);
 
 /**
  * @brief returns a random float between two values
@@ -105,7 +103,7 @@ float random_float(float min, float max);
  * @return int - -1 if negative, 1 if positive
  *
  */
-template <typename T> constexpr T sgn(T value) { return value < 0 ? -1 : 1; }
+/*template <typename T>*/ constexpr Number sgn(Number value) { return value < 0.0 ? -1.0 : 1.0; }
 
 /**
  * @brief Return the average of a vector of numbers
@@ -125,8 +123,9 @@ float avg(std::vector<float> values);
  * @return float - the smoothed output
  *
  */
-float ema(float current, float previous, float smooth);
-
+constexpr float ema(float current, float previous, float smooth) {
+    return (current * smooth) + (previous * (1 - smooth));
+}
 
 /**
  * @brief a cheap polynomial normal pdf approximation, where sigma = 1
@@ -135,7 +134,7 @@ float ema(float current, float previous, float smooth);
  * @return const float - approximation
  * 
  */
-float cheap_norm_pdf(const float x);
+// float cheap_norm_pdf(const float x);
 
 /**
  * @brief the sinc function, sin(x)/x
@@ -144,7 +143,7 @@ float cheap_norm_pdf(const float x);
  * @return float - output
  * 
  */
-constexpr double sinc(double x){
+constexpr Number sinc(Number x){
     if (std::abs(x) < 1e-9) return 1.0 - 1.0 / 6.0 * x * x;
     else return std::sin(x) / x;
 }
@@ -178,17 +177,17 @@ Number clamp(Number input, Number min, Number max);
 /**
  * 
  */
-constexpr float clamp_min_voltage(float drive_output, float drive_min_voltage);
+// float clamp_min_voltage(float drive_output, float drive_min_voltage);
 
 /**
  * 
  */
-constexpr float percent_to_volts(float percent);
+// float percent_to_volts(float percent);
 
 /**
  * 
  */
-constexpr float volts_to_percent(float volts);
+// float volts_to_percent(float volts);
 
 
 /**
@@ -212,25 +211,5 @@ Angle angleError(Angle target, Angle position,
  * @return constexpr Angle
  */
 constexpr Angle sanitizeAngle(Angle angle, bool radians = true);
-
-/**
- * 
- */
-constexpr Angle reduce_0_to_360(Angle angle);
-
-/**
- * 
- */
-constexpr Angle reduce_negative_pi_to_pi(Angle angle);
-
-/**
- * 
- */
-constexpr Angle reduce_negative_180_to_180(Angle angle);
-
-/**
- * 
- */
-constexpr Angle reduce_negative_90_to_90(Angle angle);
 
 }   // namespace atomic

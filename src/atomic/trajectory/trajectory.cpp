@@ -1,5 +1,3 @@
-#pragma once
-
 #include "atomic/trajectory/trajectory.h"
 
 #include <algorithm>
@@ -8,7 +6,9 @@ using namespace atomic;
 
 bool Trajectory::State::operator==(const Trajectory::State& other) const {
     return t == other.t && linearVelocity == other.linearVelocity &&
-           angularVelocity == other.angularVelocity && pose == other.pose;
+           angularVelocity == other.angularVelocity && 
+           pose.x == other.pose.x && pose.y == other.pose.y &&
+           pose.orientation == other.pose.orientation;
 }
 
 bool Trajectory::State::operator!=(const Trajectory::State& other) const {
@@ -58,7 +58,7 @@ Trajectory::State Trajectory::State::interpolate(State endValue,
     // interpolation is the change in position (delta s) divided by the total
     // distance between the two endpoints.
     const double interpolationFrac =
-        newS.convert(m) / endValue.pose.distance(pose);
+        newS / endValue.pose.distanceTo(pose);
 
     return {newT, newV, newAngularV,
             Lerp(pose, endValue.pose, interpolationFrac)};
@@ -99,16 +99,16 @@ Trajectory::State Trajectory::sample(Time t) const {
         *sample, (t - prevSample->t).convert(sec) / (sample->t - prevSample->t).convert(sec));
 }
 
-Trajectory Trajectory::relativeTo(const Pose& pose) {
-    Pose translation = Pose(pose.x - m_states.front().pose.x,
-                            pose.y - m_states.front().pose.y,
-                            pose.theta - m_states.front().pose.theta);
+Trajectory Trajectory::relativeTo(const units::Pose& pose) {
+    units::Pose translation = units::Pose(pose.x - m_states.front().pose.x,
+                                          pose.y - m_states.front().pose.y,
+                                          pose.orientation - m_states.front().pose.orientation);
 
     auto newStates = m_states;
     for (auto& state : newStates) {
-        state.pose = Pose(state.pose.x + translation.x,
+        state.pose = units::Pose(state.pose.x + translation.x,
                           state.pose.y + translation.y,
-                          state.pose.theta + translation.theta);
+                          state.pose.orientation + translation.orientation);
     }
     return Trajectory(newStates);
 }

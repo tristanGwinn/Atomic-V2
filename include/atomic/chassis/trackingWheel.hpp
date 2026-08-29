@@ -1,7 +1,8 @@
 #pragma once
 
-#include "pros/motors.hpp"
-#include "pros/motor_group.hpp"
+#include "hardware/Encoder/Encoder.hpp"
+#include "hardware/Motor/Motor.hpp"
+#include "hardware/Motor/MotorGroup.hpp"
 #include "pros/adi.hpp"
 #include "pros/rotation.hpp"
 

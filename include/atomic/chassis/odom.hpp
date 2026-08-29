@@ -6,7 +6,6 @@
 #include "pros/rtos.hpp"
 
 #include "atomic/chassis/trackingWheel.hpp"
-#include "atomic/pose.hpp"
 #include "units/Pose.hpp"
 
 #include <vector>

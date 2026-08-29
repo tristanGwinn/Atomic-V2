@@ -1,9 +1,9 @@
 #include "atomic/chassis/odom.hpp"
 #include "hardware/Encoder/V5RotationSensor.hpp"
-#include "LemLog/logger/Helper.hpp"
+// #include "LemLog/logger/Helper.hpp"
 #include "units/Vector2D.hpp"
 
-static logger::Helper helper("atomic/chassis/odom");
+// static logger::Helper helper("atomic/chassis/odom");
 
 
 namespace atomic {
@@ -25,9 +25,9 @@ void Odometry::startTask(Time period) {
     // check if the task has been started yet
     if (m_task == std::nullopt) { // start the task
         m_task = pros::Task([this, period] { this->update(period); });
-        helper.log(logger::Level::INFO, "Tracking task started!");
+        // helper.log(logger::Level::INFO, "Tracking task started!");
     } else {
-        helper.log(logger::Level::WARN, "Tried to start tracking task, but it has already been started!");
+        // helper.log(logger::Level::WARN, "Tried to start tracking task, but it has already been started!");
     }
 }
 
@@ -57,7 +57,7 @@ static TrackingWheelData findLateralDelta(std::vector<TrackingWheel*>& sensors) 
         if (data.internal() == INFINITY) { // error checking
             sensors.erase(sensors.begin() + i);
             --i;
-            helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
+            // helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
         } else return {data, sensor->getOffset()};
     }
     // return 0 if no data was found
@@ -82,18 +82,18 @@ static std::optional<Angle> calculateWheelHeading(std::vector<TrackingWheel*>& t
     const Length offset2 = trackingWheels.at(1)->getOffset();
     // check that the offsets aren't the same
     if (offset1 == offset2) {
-        helper.log(logger::Level::WARN, "Tracking wheel offsets are equal, removing one tracking wheel!");
+        // helper.log(logger::Level::WARN, "Tracking wheel offsets are equal, removing one tracking wheel!");
         trackingWheels.erase(trackingWheels.begin() + 1);
         return calculateWheelHeading(trackingWheels);
     }
     // check for errors
     if (distance1.internal() == INFINITY) {
-        helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
+        // helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
         trackingWheels.erase(trackingWheels.begin());
         return calculateWheelHeading(trackingWheels);
     }
     if (distance2.internal() == INFINITY) {
-        helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
+        // helper.log(logger::Level::WARN, "Failed to get data from tracking wheel, removing tracking wheel!");
         trackingWheels.erase(trackingWheels.begin() + 1);
         return calculateWheelHeading(trackingWheels);
     }
@@ -115,7 +115,7 @@ static std::optional<Angle> calculateIMUHeading(std::vector<IMU*>& imus) {
         if (data.internal() == INFINITY) { // error checking
             imus.erase(imus.begin() + i);
             --i;
-            helper.log(logger::Level::WARN, "Failed to get data from IMU, removing IMU!");
+            // helper.log(logger::Level::WARN, "Failed to get data from IMU, removing IMU!");
         } else return data;
     }
     // return nullopt if we couldn't get any data
@@ -144,7 +144,7 @@ void Odometry::update(Time period) {
                                                   .or_else(std::bind(&calculateWheelHeading, m_horizontalWheels))
                                                   .or_else(std::bind(&calculateWheelHeading, m_verticalWheels));
         if (thetaOpt == std::nullopt) { // error checking
-            helper.log(logger::Level::ERROR, "Not enough sensors available!");
+            // helper.log(logger::Level::ERROR, "Not enough sensors available!");
             break;
         }
         const Angle theta = m_offset + *thetaOpt;
@@ -172,7 +172,7 @@ void Odometry::update(Time period) {
         prevTime = from_msec(dummyPrevTime);
     }
 
-    helper.log(logger::Level::INFO, "Tracking task stopped!");
+    // helper.log(logger::Level::INFO, "Tracking task stopped!");
 }
 
 Odometry::~Odometry() { m_task->notify(); }

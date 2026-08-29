@@ -3,64 +3,100 @@
  * 45434A VEX Atomic Framework and Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 8/25/26
+ * Date Updated: 8/29/26
  * Updated By: Tristan Gwinn
  * 
  * Note:
- * 	As of now, nothing has been tested,
- *  and some functionality may be broken/or unintentionally left unfinished.
+ * 	As of now, some functionality may be broken or unintentionally left unfinished.
  * 
  * ToDo: 
- * 	It's okay to reference old code and other templates/frameworks to implement features
- * 	- Create a formatting guide
- * 	- Driver control recording/playback
  *  - Verify driver control functionality
+ *  - Add functionality for time parameterized trajectory generation
  * 	- Review RAMSETE controller code
- *  - Review and potentially remove atomic::Pose in favor of units::pose
+ * 	- Driver control recording/playback
  * 	
  * What's New:
- * 	- Most of the code now uses proper units and is formatted consistently
- * 	- Ramsete controller (untested)
- *  - Realtime motion-profiled trajectory generation
- * 	- Trajectory following
- * 	- Turn to
- *  - Move to Pose
- *  - Move to Point
- *  - Chassis class was removed
- *  - toAngularVelocity() was added to units class to handle calculating angular velocity
+ *  - Removed atomic::Pose in favor of units::pose
+ *  - Project now builds successfully
+ *  - Hardware wrappers have been brought over from lemlib
+ *  - Removed unused and unnecessary libraries and functionality
  * 
  */
 
 #include "main.h"
-#include "lemlog/logger/sinks/terminal.hpp"
+// #include "lemlog/logger/sinks/terminal.hpp"
 #include "hardware/IMU/V5InertialSensor.hpp"
 #include "atomic/driveCurve.hpp"
 #include "atomic/motionConfig.hpp"
+#include "atomic/chassis/odom.hpp"
 #include "pros/llemu.hpp"
 #include "subsystems.hpp"
 
-atomic::ExpoDriveCurve defaultDriveCurve;
 
-
-logger::Terminal terminal;
-
-atomic::MotorGroup rightDrive({8, 10}, 360_rpm);
-atomic::MotorGroup leftDrive({-1, 11, -12, 13}, 360_rpm);
-
-atomic::V5InertialSensor imu(1);
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
+atomic::ExpoDriveCurve defaultDriveCurve(5.0, 12.0, 1.132);
+
+// Physical robot variables
+const Length track_width = 11.50_in;
+const Length wheel_diameter = 2.75_in;
+const AngularVelocity max_rpm = 450_rpm;
+
+atomic::MotorGroup left_motors({-11, -12}, 450_rpm);
+atomic::MotorGroup right_motors({20, 19}, 450_rpm);
+
+atomic::V5InertialSensor imu(2);
+
+atomic::TrackingWheel vertical_tracker(
+                                atomic::ReversibleSmartPort(20),    // tracking port
+                                wheel_diameter,                     // diameter
+                                track_width / 2                     // offset
+                            );
+
+atomic::TrackingWheel horizontal_tracker(
+                                atomic::ReversibleSmartPort(18),    // tracking port
+                                2.0_in,                             // diameter
+                                -3.0_in                             // offset
+                            );
+
+atomic::Odometry odom({&imu}, {&vertical_tracker}, {&horizontal_tracker});
+
+// PID variables
+extern const atomic::PID angular_pid(0.05, 0, 0);
+extern const atomic::PID lateral_pid(0.05, 0, 0);
+
+const atomic::ExitConditionGroup<AngleRange> angular_exit_conditions({atomic::ExitCondition<AngleRange>(0.5_cDeg, 1000_msec)});
+const atomic::ExitConditionGroup<Length> lateral_exit_conditions({atomic::ExitCondition(1.0_in, 2000_msec)});
+
+const Number angular_slew = 1.0;
+const Number lateral_slew = 1.0;
+
 
 bool logoOnBrain = false;
 LV_IMAGE_DECLARE(logo);
 
 void initialize() {
-	if (logoOnBrain){
-		lv_obj_t *img = lv_image_create(lv_screen_active());
-		lv_image_set_src(img, &logo);
-		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-	}
+	// if (logoOnBrain){
+	// 	lv_obj_t *img = lv_image_create(lv_screen_active());
+	//	lv_image_set_src(img, &logo);
+	//	lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+	// }
 
+	// imu.calibrate();
 
+	/*odom.startTask();
+
+	pros::lcd::initialize(); // initialize brain screen
+
+    while (true) {
+    	// get current pose of the robot
+        const units::Pose pose = odom.getPose();
+        // print pros to the brain screen
+        pros::lcd::print(0, "x: %f", (pose.x));
+        pros::lcd::print(1, "y: %f", (pose.y));
+        pros::lcd::print(2, "theta: %f", (pose.orientation));
+        // delay to let other tasks run
+        pros::delay(10);
+	}*/
 
 }
 
@@ -70,4 +106,17 @@ void competition_initialize() {}
 
 void autonomous() {}
 
-void opcontrol() {}
+void opcontrol() {
+	while (true) {
+        float leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        float rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+    	float left = defaultDriveCurve.curve(leftY + rightX);
+    	float right = defaultDriveCurve.curve(leftY - rightX);
+    	// left_motors.move(left);
+    	// right_motors.move(right);
+
+    	pros::delay(10);
+  	}
+
+}

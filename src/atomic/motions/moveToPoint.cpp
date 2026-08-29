@@ -1,5 +1,5 @@
 #include "atomic/motions/moveToPoint.hpp"
-#include "LemLog/logger/Helper.hpp"
+// #include "LemLog/logger/Helper.hpp"
 #include "atomic/MotionCancelHelper.hpp"
 #include "atomic/Timer.hpp"
 #include "atomic/util.hpp"
@@ -8,10 +8,10 @@ using namespace units;
 
 namespace atomic {
 
-static logger::Helper logHelper("atomic/motions/moveToPoint");
+// static logger::Helper logHelper("atomic/motions/moveToPoint");
 
 void moveToPoint(V2Position target, Time timeout, MoveToPointParams params, MoveToPointSettings settings) {
-    logHelper.info("moving to point {}", target);
+    // logHelper.info("moving to point {}", target);
 
     // initialize persistent variables
     const Angle initialAngle = settings.poseGetter().angleTo(target);
@@ -84,9 +84,9 @@ void moveToPoint(V2Position target, Time timeout, MoveToPointParams params, Move
         }();
 
         // print debug info
-        logHelper.debug("Moving with {:.4f} lateral power, {:.4f} angular power, {:.4f} lateral error, {:.4f} angular "
-                        "error, {:.4f} dt",
-                        lateralOut, angularOut, lateralError, angularError, helper.getDelta());
+        // logHelper.debug("Moving with {:.4f} lateral power, {:.4f} angular power, {:.4f} lateral error, {:.4f} angular "
+        //                 "error, {:.4f} dt",
+        //                 lateralOut, angularOut, lateralError, angularError, helper.getDelta());
 
         // calculate drivetrain outputs
         const auto out = desaturate(lateralOut, angularOut);

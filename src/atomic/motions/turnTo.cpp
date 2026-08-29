@@ -1,6 +1,6 @@
 #include "atomic/motions/turnTo.hpp"
 #include "atomic/MotionCancelHelper.hpp"
-#include "LemLog/logger/Helper.hpp"
+// #include "LemLog/logger/Helper.hpp"
 #include "atomic/Timer.hpp"
 #include "atomic/util.hpp"
 #include <optional>
@@ -10,7 +10,7 @@ using namespace units;
 
 namespace atomic {
 
-static logger::Helper logHelper("atomic/motions/turnTo");
+// static logger::Helper logHelper("atomic/motions/turnTo");
 
 /**
  * @brief Calculate the error
@@ -33,8 +33,8 @@ static Angle calculateError(std::variant<Angle, V2Position> target, const units:
 
 void turnTo(std::variant<Angle, V2Position> target, Time timeout, TurnToParams params, TurnToSettings settings) {
     // print debug info
-    if (std::holds_alternative<Angle>(target)) logHelper.info("Turning to {:.2f}", std::get<Angle>(target));
-    else logHelper.info("Turning to face point {:.2f}", std::get<V2Position>(target));
+    // if (std::holds_alternative<Angle>(target)) logHelper.info("Turning to {:.2f}", std::get<Angle>(target));
+    // else logHelper.info("Turning to face point {:.2f}", std::get<V2Position>(target));
 
     // figure out which way to limit acceleration
     const SlewDirection slewDirection = [&] {
@@ -71,7 +71,8 @@ void turnTo(std::variant<Angle, V2Position> target, Time timeout, TurnToParams p
         // calculate deltaTheta
         deltaTheta = [&] {
             const Angle raw = calculateError(target, pose);
-            settling = prevRawDeltaTheta != std::nullopt && (sgn(raw) != sgn(prevRawDeltaTheta.value()));
+            settling = prevRawDeltaTheta != std::nullopt && 
+                       ((raw.internal() < 0 ? -1 : 1) != (prevRawDeltaTheta.value().internal() < 0 ? -1 : 1));
             prevRawDeltaTheta = raw;
             const Angle error = calculateError(target, pose, settling ? std::nullopt : params.direction);
             if (prevDeltaTheta == std::nullopt) prevDeltaTheta = error;
@@ -81,7 +82,8 @@ void turnTo(std::variant<Angle, V2Position> target, Time timeout, TurnToParams p
         // motion chaining
         // exit the motion to immediately continue to the next one
         if (params.minSpeed != 0 && abs(deltaTheta) < params.earlyExitRange) break;
-        if (params.minSpeed != 0 && sgn(deltaTheta) != sgn(prevDeltaTheta.value())) break;
+        if (params.minSpeed != 0 && (deltaTheta.internal() < 0 ? -1 : 1) 
+                                    != (prevDeltaTheta.value().internal() < 0 ? -1 : 1)) break;
 
         // record prevDeltaTheta
         prevDeltaTheta = deltaTheta;
@@ -99,8 +101,8 @@ void turnTo(std::variant<Angle, V2Position> target, Time timeout, TurnToParams p
         prevMotorPower = motorPower;
 
         // print debug info
-        logHelper.debug("Turning with {:.4f} power, error: {:.2f} stDeg, dt: {:.4f}", motorPower, to_stDeg(deltaTheta),
-                        helper.getDelta());
+        // logHelper.debug("Turning with {:.4f} power, error: {:.2f} stDeg, dt: {:.4f}", motorPower, to_stDeg(deltaTheta),
+        //                 helper.getDelta());
 
         // move the motors
         settings.leftMotors.move(-motorPower);

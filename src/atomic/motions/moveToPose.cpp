@@ -1,5 +1,5 @@
 #include "atomic/motions/moveToPose.hpp"
-#include "LemLog/logger/Helper.hpp"
+// #include "LemLog/logger/Helper.hpp"
 #include "atomic/MotionCancelHelper.hpp"
 #include "atomic/Timer.hpp"
 #include "atomic/util.hpp"
@@ -8,7 +8,7 @@ using namespace units;
 
 namespace atomic {
 
-static logger::Helper logHelper("atomic/motions/moveToPose");
+// static logger::Helper logHelper("atomic/motions/moveToPose");
 
 void moveToPose(units::Pose target, Time timeout, MoveToPoseParams params, MoveToPoseSettings settings) {
     // initialize persistent variables
@@ -105,9 +105,9 @@ void moveToPose(units::Pose target, Time timeout, MoveToPoseParams params, MoveT
         }();
 
         // print debug info
-        logHelper.debug("Moving with {:.4f} lateral power, {:.4f} angular power, {:.4f} lateral error, {:.4f} angular "
-                        "error, {:.4f} dt",
-                        lateralOut, angularOut, lateralError, angularError, helper.getDelta());
+        // logHelper.debug("Moving with {:.4f} lateral power, {:.4f} angular power, {:.4f} lateral error, {:.4f} angular "
+        //                 "error, {:.4f} dt",
+        //                 lateralOut, angularOut, lateralError, angularError, helper.getDelta());
 
         // calculate drivetrain outputs
         const auto out = desaturate(lateralOut, angularOut);

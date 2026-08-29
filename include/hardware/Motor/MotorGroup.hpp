@@ -7,9 +7,6 @@
 #include "pros/rtos.hpp"
 #include <vector>
 
-// This was ripped directly from LemLib
-// The namespaced was changed from lemlib to atomic for consistency
-
 namespace atomic {
 /**
  * @brief MotorGroup class
