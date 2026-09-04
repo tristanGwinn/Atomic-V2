@@ -148,25 +148,6 @@ constexpr Number sinc(Number x){
     else return std::sin(x) / x;
 }
 
-/**
- * @brief Convert degrees to radians
- *
- * @param deg degrees
- * @return float radians
- *
- */
-constexpr float deg_to_rad(float angle_deg) { return angle_deg * M_PI / 180; }
-
-/**
- * @brief Convert radians to degrees
- *
- * @param rad radians
- * @return float degrees
- *
- */
-constexpr float rad_to_deg(float angle_rad) { return angle_rad * 180 / M_PI; }
-
-
 // TODO: add function info, i.e. briefs and params, to the following funtions
 
 /**
@@ -174,21 +155,17 @@ constexpr float rad_to_deg(float angle_rad) { return angle_rad * 180 / M_PI; }
  */
 Number clamp(Number input, Number min, Number max);
 
-/**
- * 
- */
 // float clamp_min_voltage(float drive_output, float drive_min_voltage);
 
 /**
- * 
+ * @brief convert a percentage, -1 to 1, to a voltage value, -127 to 127 
  */
-// float percent_to_volts(float percent);
+Number percent_to_volts(Number percent);
 
 /**
- * 
+ * @brief convert a voltage value, -127 to 127, to a percentage, -1 to 1
  */
-// float volts_to_percent(float volts);
-
+Number volts_to_percent(Number volts);
 
 /**
  * @brief Calculate the error between two angles

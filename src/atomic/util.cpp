@@ -48,7 +48,7 @@ Curvature getSignedTangentArcCurvature(units::Pose start, V2Position end) {
     return min + r;
 }*/
 
-float /*atomic::*/avg(std::vector<float> values) {
+float avg(std::vector<float> values) {
     float sum = 0;
     for (float value : values) { sum += value; }
     return sum / values.size();
@@ -67,7 +67,7 @@ float /*atomic::*/avg(std::vector<float> values) {
 } */
 
 
-Number /*atomic::*/clamp(Number input, Number min, Number max){
+Number clamp(Number input, Number min, Number max){
     if(input > max){
         return max;
     }else if (min > input)
@@ -87,15 +87,15 @@ Number /*atomic::*/clamp(Number input, Number min, Number max){
     }
     return drive_output;
 }
+*/
 
-float percent_to_volts(float percent){
+Number percent_to_volts(Number percent){
    return (127 * percent);
 }
 
-float volts_to_percent(float volts){
+Number volts_to_percent(Number volts){
    return (volts / 127);
 }
-*/
 
 Angle angleError(Angle target, Angle position, std::optional<AngularDirection> direction) {
     // Wrap the angle to be within 0pi and 2pi radians

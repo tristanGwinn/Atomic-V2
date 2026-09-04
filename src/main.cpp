@@ -24,22 +24,36 @@
  */
 
 #include "main.h"
-// #include "lemlog/logger/sinks/terminal.hpp"
 #include "hardware/IMU/V5InertialSensor.hpp"
 #include "atomic/driveCurve.hpp"
 #include "atomic/motionConfig.hpp"
 #include "atomic/chassis/odom.hpp"
+
+#include "atomic/motions/ramseteTrajectoryFollower.hpp"
+
+#include "atomic/trajectory/kinematics.hpp"
+#include "atomic/trajectory/trajectoryGenerator.hpp"
+
 #include "pros/llemu.hpp"
 #include "subsystems.hpp"
 
-
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-atomic::ExpoDriveCurve defaultDriveCurve(5.0, 12.0, 1.132);
+atomic::ExpoDriveCurve defaultDriveCurve(0.0, 1.0, 1.12);
 
 // Physical robot variables
 const Length track_width = 11.50_in;
 const Length wheel_diameter = 2.75_in;
 const AngularVelocity max_rpm = 450_rpm;
+
+const LinearVelocity max_vel = 64.8_inps;           // max_vel = wheel_diameter * PI * max_rpm / 60_sec
+const LinearAcceleration max_accel = 3.40_mps2;     // max_accel = drivetrain force at max rpm / robot mass
+
+atomic::DifferentialKinematics robot_kinematics(
+                                    track_width,
+                                    max_vel,
+                                    max_accel,
+                                    2.0         // friction coefficient
+                                );
 
 atomic::MotorGroup left_motors({-11, -12}, 450_rpm);
 atomic::MotorGroup right_motors({20, 19}, 450_rpm);
@@ -70,33 +84,41 @@ const atomic::ExitConditionGroup<Length> lateral_exit_conditions({atomic::ExitCo
 const Number angular_slew = 1.0;
 const Number lateral_slew = 1.0;
 
-
-bool logoOnBrain = false;
 LV_IMAGE_DECLARE(logo);
 
+
+bool logoOnBrain = true;
+bool showDebug = true;
+
 void initialize() {
-	// if (logoOnBrain){
-	// 	lv_obj_t *img = lv_image_create(lv_screen_active());
-	//	lv_image_set_src(img, &logo);
-	//	lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-	// }
+	if (logoOnBrain){
+		lv_obj_t *img = lv_image_create(lv_screen_active());
+		lv_image_set_src(img, &logo);
+		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+	}
 
-	// imu.calibrate();
+    if(imu.isConnected()){
+        imu.calibrate();
+	    odom.startTask();
+    }else{
+        showDebug = false;
+    }
 
-	/*odom.startTask();
-
-	pros::lcd::initialize(); // initialize brain screen
+	if (showDebug) pros::lcd::initialize(); // initialize brain screen if needed
 
     while (true) {
-    	// get current pose of the robot
-        const units::Pose pose = odom.getPose();
-        // print pros to the brain screen
-        pros::lcd::print(0, "x: %f", (pose.x));
-        pros::lcd::print(1, "y: %f", (pose.y));
-        pros::lcd::print(2, "theta: %f", (pose.orientation));
+        if (showDebug){
+            // get current pose of the robot
+            const units::Pose pose = odom.getPose();
+            // print pros to the brain screen
+            pros::lcd::print(0, "x: %f", (pose.x));
+            pros::lcd::print(1, "y: %f", (pose.y));
+            pros::lcd::print(2, "theta: %f", (pose.orientation));
+        }
+        
         // delay to let other tasks run
         pros::delay(10);
-	}*/
+	}
 
 }
 
@@ -113,8 +135,8 @@ void opcontrol() {
 
     	float left = defaultDriveCurve.curve(leftY + rightX);
     	float right = defaultDriveCurve.curve(leftY - rightX);
-    	// left_motors.move(left);
-    	// right_motors.move(right);
+    	left_motors.move(left / 127);
+    	right_motors.move(right / 127);
 
     	pros::delay(10);
   	}

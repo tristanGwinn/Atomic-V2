@@ -14,7 +14,7 @@ class TrajectoryGenerator {
             : m_kinematics(kinematics), m_deltaD(deltaD) {};
 
         void generateTrajectory(Path *path);
-        std::vector<Trajectory::State>* getTrajectory();
+        std::vector<Trajectory::State> getTrajectory();
 
     private:
         Kinematics *m_kinematics;

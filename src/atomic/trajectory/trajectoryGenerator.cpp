@@ -94,4 +94,4 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
 
 }
 
-std::vector<Trajectory::State> *TrajectoryGenerator::getTrajectory() { return &trajectoryStates; }
+std::vector<Trajectory::State> TrajectoryGenerator::getTrajectory() { return trajectoryStates; }

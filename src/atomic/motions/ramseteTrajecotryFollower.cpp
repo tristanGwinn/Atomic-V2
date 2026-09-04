@@ -21,8 +21,7 @@ void followTrajectory(const atomic::Trajectory& t, RameseteFollowSettings settin
     atomic::MotionCancelHelper helper(10_msec); // cancel helper
 
     // this value will let us convert linear velocity to motor voltage
-    // meters per second * (revolutions per meter * 60_sec per minute) / max rpm -->  new movement percentage
-    const auto velToPercentage = (60_sec) / (max_rpm * wheel_diameter * M_PI);
+    const auto max_velocity = toLinear<AngularVelocity>(max_rpm, wheel_diameter);
 
     for(int i = 1; i < states.size(); ++i) {
         if(helper.wait()) {
@@ -36,18 +35,20 @@ void followTrajectory(const atomic::Trajectory& t, RameseteFollowSettings settin
             DriveVelocities driveVel = settings.ramseteController.calculate(curState, states[i]);
 
             // side velocity = linear velocity +/- angular velocity * track_width/2
-            const auto leftSideVelocity = driveVel.v.internal() - driveVel.omega.internal() * track_width.internal() / 2;
-            const auto rightSideVelocity = driveVel.v.internal() + driveVel.omega.internal() * track_width.internal() / 2;
+            const auto leftSideVelocity = driveVel.v - toLinear<AngularVelocity>(driveVel.omega, track_width);
+            const auto rightSideVelocity = driveVel.v + toLinear<AngularVelocity>(driveVel.omega, track_width);
 
-            left_motors.move(velToPercentage.internal() * leftSideVelocity);
-            right_motors.move(velToPercentage.internal() * rightSideVelocity);
+            left_motors.move(leftSideVelocity / max_velocity);
+            right_motors.move(rightSideVelocity / max_velocity);
+            
+            // time to wait (msec) = delta distance / output velocity
+            Time timeToWait = states[i].pose.distanceTo(states[i - 1].pose) / driveVel.v;
 
-            Time timeToWait = states[i].t - states[i - 1].t;
-            pros::delay(timeToWait/sec);
+            pros::delay(timeToWait.convert(msec));
         }else{
             break;
         }
-    } 
+    }
 
     // stop the robot
     left_motors.brake();

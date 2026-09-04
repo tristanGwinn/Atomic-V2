@@ -2,10 +2,12 @@
 
 #include "atomic/exitCondition.hpp"
 #include "atomic/pid.hpp"
+
 #include "atomic/ramsete/ramseteController.hpp"
+#include "atomic/trajectory/kinematics.hpp"
+
 #include "atomic/chassis/trackingWheel.hpp"
 #include "hardware/IMU/V5InertialSensor.hpp"
-
 #include "hardware/Motor/MotorGroup.hpp"
 
 #include "units/Pose.hpp"
@@ -18,7 +20,10 @@
 extern const atomic::PID angular_pid;
 extern const atomic::PID lateral_pid;
 
+// extern const atomic::RameseteFollowSettings ramsete_settings;
+
 extern const atomic::RamseteController ramsete_controller;
+extern atomic::DifferentialKinematics robot_kinematics;
 
 extern const std::function<units::Pose()> pose_getter;
 
@@ -26,6 +31,7 @@ extern const std::function<units::Pose()> pose_getter;
 extern const Length track_width;
 extern const Length wheel_diameter;
 extern const AngularVelocity max_rpm;
+extern const Mass robot_mass;
 
 extern const Number drift_compensation;
 

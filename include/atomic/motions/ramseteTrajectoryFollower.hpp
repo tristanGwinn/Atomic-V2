@@ -1,7 +1,6 @@
 #pragma once
 
 #include "atomic/motionConfig.hpp"
-#include "hot-cold-asset/asset.hpp"
 
 namespace atomic {
 
@@ -15,4 +14,4 @@ struct RameseteFollowSettings {
 
 void followTrajectory(const atomic::Trajectory& t, RameseteFollowSettings settings);
 
-}   // namespace lemlib
+}   // namespace atomic

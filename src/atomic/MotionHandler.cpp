@@ -7,7 +7,7 @@ static std::optional<pros::Task> motionTask = std::nullopt;
 
 void move(std::function<void(void)> f) {
     // wait until there is no motion running
-    while (isMoving()) pros::delay(5);;
+    while (isMoving()) pros::delay(5);
     // start the new motion
     motionTask = pros::Task([=] {
         // only start the motion if it hasn't been cancelled yet
