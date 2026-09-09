@@ -3,23 +3,19 @@
  * 45434A VEX Atomic Framework and Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 8/29/26
+ * Date Updated: 9/8/26
  * Updated By: Tristan Gwinn
  * 
- * Note:
- * 	As of now, some functionality may be broken or unintentionally left unfinished.
- * 
  * ToDo: 
- *  - Verify driver control functionality
- *  - Add functionality for time parameterized trajectory generation
- * 	- Review RAMSETE controller code
- * 	- Driver control recording/playback
+ *  - Add a subsystem / action command scheduler to handle subsystem use (Current Focus)
+ *  - Add functionality to read json files as trajectories (High Priority)
+ * 	- Test RAMSETE functionality (Med Priority)
+ *  - Update Atomic logo to new pink version (Low Priority)
+ * 	- Driver control recording/playback (Low Priority)
  * 	
  * What's New:
- *  - Removed atomic::Pose in favor of units::pose
- *  - Project now builds successfully
- *  - Hardware wrappers have been brought over from lemlib
- *  - Removed unused and unnecessary libraries and functionality
+ *  - Robot is drivable
+ *  - Temporary operator control of the lift has been added
  * 
  */
 
@@ -128,15 +124,15 @@ void competition_initialize() {}
 
 void autonomous() {}
 
-
-// this is here bcs its for testin
+// this is here temporarily due to testing needs
 
 // stage right lift motor = 13, reversed : (-13)
 // stage left lift motor = 7, forward    : (7)
 atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);
-float lift_percent = 1;	// 1 = 1
+float lift_percent = 1;
 
 void opcontrol() {
+    // temp. code
 	lift_motors.setBrakeMode(atomic::BrakeMode::HOLD);
 
 	while (true) {
@@ -148,6 +144,7 @@ void opcontrol() {
     	left_motors.move(left / 127);
     	right_motors.move(right / 127);
 
+        // temp. code start
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)))
 		{
 			lift_motors.move(lift_percent);
@@ -160,6 +157,7 @@ void opcontrol() {
 		{
 			lift_motors.brake();
 		}
+        // temp. code end
 
     	pros::delay(10);
   	}
