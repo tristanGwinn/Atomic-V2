@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <vector>
-#include "atomic/MotionHandler.hpp"
+#include "atomic/motion-handler/MotionHandler.hpp"
 
 /**
  * @brief this macro can be used to greatly simplify passing motion algorithms to the motion handler

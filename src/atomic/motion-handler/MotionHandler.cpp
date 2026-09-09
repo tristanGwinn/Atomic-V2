@@ -1,4 +1,4 @@
-#include "atomic/MotionHandler.hpp"
+#include "atomic/motion-handler/MotionHandler.hpp"
 #include "pros/rtos.hpp"
 
 namespace atomic::motion_handler {

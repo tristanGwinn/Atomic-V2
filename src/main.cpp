@@ -31,7 +31,6 @@
 #include "atomic/trajectory/trajectoryGenerator.hpp"
 
 #include "pros/llemu.hpp"
-#include "subsystems.hpp"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 atomic::ExpoDriveCurve defaultDriveCurve(0.0, 1.0, 1.12);
