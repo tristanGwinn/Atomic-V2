@@ -19,6 +19,14 @@
  * 
  */
 
+
+/////
+//
+//  To download code on linux, run sudo chmod a+rw after connecting brain / controller
+//
+/////
+
+
 #include "main.h"
 #include "hardware/IMU/V5InertialSensor.hpp"
 #include "atomic/driveCurve.hpp"
@@ -92,6 +100,7 @@ void initialize() {
 		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 	}
 
+    /*
     if(imu.isConnected()){
         imu.calibrate();
 	    odom.startTask();
@@ -114,6 +123,7 @@ void initialize() {
         // delay to let other tasks run
         pros::delay(10);
 	}
+    */
 
 }
 
