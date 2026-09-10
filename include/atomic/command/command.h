@@ -131,4 +131,55 @@ class Command {
 
         // TODO:
 
+        /**
+         *
+         * @brief See if the command is currently scheduled in the
+         * \refitem CommandScheduler
+         *
+         * ```C
+         * // Declare command(example)
+         * Command* command;
+         *
+         * // Use shorthand to schedule the command
+         * command->schedule();
+         *
+         * // command is now scheduled
+         * assert(command->scheduled() == true);
+         *
+         * // Cancel the command
+         * command->cancel();
+         *
+         * // command is no longer running
+         * assert(command->scheduled() == false);
+         * ```
+         */
+        [[nodiscard]] bool scheduled() const;
+
+         /**
+          * @brief Create a \refitem Sequence with 2 commands
+          *           
+          * @param other The command to run after the current command
+          * @return A \refitem Sequence with this running first and 'other' running after
+          */
+         Command *andThen(Command *other);
+
+         /**
+          * @brief Specify a timeout on this command
+          * 
+          * @param duration The maximum running duration of the Command
+          * @return \refitem ParallelRaceGroup with this and \refitem WaitCommand
+          * of the desired duration
+          */
+        Command *withTimeout(Time duration);
+
+        /**
+         * @brief Run the Command until until a condition is met
+         * 
+         * @param isFinished When this condition returns true, the command will stop
+         * @return \refitem ParallelRaceGroup with this and \refitem WaitUntilCommand
+         * with the desired 'isFinish'
+         */
+        Command *until(const std::function<bool> &isFinished);
+
+        
 };
