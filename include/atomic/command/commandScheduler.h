@@ -24,7 +24,8 @@ class CommandScheduler {
         std::unordered_map<Subsystem*, Command*> requirements;
         std::vector<Command*> scheduledCommands;
 
-        // EventLoop teleopEventLoop{};		// not likely needed
+        // teleop tasks only run if the robot is in driver control
+        EventLoop teleopEventLoop{};
         EventLoop eventLoop{};
 
         bool inRunLoop = false;
@@ -41,7 +42,7 @@ class CommandScheduler {
         }
 
         static void registerSubsystem(Subsystem* subsystem, Command* default_command) {
-            CommandScheduler& instance = getInstance();
+            CommandScheduler& instance = getInstance();     // singleton
 
             // Make sure the subsystem isn't already registered
             assert(!instance.subsystems.contains(subsystem));
@@ -53,7 +54,7 @@ class CommandScheduler {
         }
 
         static void schedule(Command* command) {
-	    	CommandScheduler& instance = getInstance();
+	    	CommandScheduler& instance = getInstance();     // singleton
 
             // Return if the command is already scheduled
             if (command == nullptr || scheduled(command)) {
@@ -98,17 +99,122 @@ class CommandScheduler {
             }
         }
 
-        // static std::optional<Command*> getRequiring(Subsystem* subsystem) {...
+        static std::optional<Command*> getRequiring(Subsystem* subsystem) {
+            CommandScheduler& instance = getInstance();     // singleton
 
-        // static void run() {...
+            // return requirements if subsystem is not at end condition
+            if (instance.requirements.find(subsystem) != instance.requirements.end()) {
+                return instance.requirements[subsystem];
+            }
+
+            // if subsystem is at end condition, return null
+            return std::nullopt;
+        }
+
+        static void run() {
+            CommandScheduler& instance = getInstance();     //singleton
+
+            // Run the periodic for all registered subystems
+            for (const auto& pair : instance.subsystem) {
+                pair.first->periodic();
+            }
+
+            // Poll user set event loops
+            instance.eventLoop.poll(); 
+
+            // Only poll teleop tasks when the robot controller is active
+            if (!pros::competition::is_autonomous() && ! pros::competition::is_disabled()) {
+                instance.teleopEventLoop.poll(); 
+            }
+
+            instance.isRunLoop = true; 
+
+            // exectute commands and then remove ended commands
+            for (auto command : instance.scheduledCommands) {
+                command->exectue();
+
+                if (command->isFinished()) {
+                    command->end(false);
+
+                    for (auto requirement : command->getRequirements()) {
+                        instance.requirements.erase(requirement);
+                    }
+
+                    std::erase(instance.scheduledCommands, command); 
+                }
+            }
+
+            instance.isRunLoop = false; 
+
+            // cancel and schedule commands
+            for (const auto command : instance.toCancel) {
+                cancel(command);
+            }
+            for (const auto command : instace.toSchedule) {
+                schedule(command);
+            }
+
+            // erase toCancel and toSchedule for the next cycle
+            instance.toCancel.clear();
+            instance.toSchedule.clear();
+
+            // schedule subsystem commands if subsystem is not in use
+            for (auto [subsystem, command] : instance.subsystems) {
+                if (!instance.requirements.contains(subsystem)) {
+                    schedule(command);
+                }
+            }
+        }
 
         static bool scheduled(const Command* command) {	
-            CommandScheduler& instance = getInstance();
+            CommandScheduler& instance = getInstance();     // singleton
     
             return std::find(instance.scheduledCommands.begin(), instance.scheduledCommands.end(), command) != instance.
             scheduledCommands.end();
         }
 
-        // TODO:
+        static EventLoop* getEventLoop() {
+            CommandScheduler& instance = getInstance();     // singleton
+
+            return &instance.eventLoop;
+        }
+
+        static EventLoop* getTeleopEventLoop() {
+            CommandScheduler& instance = getInstance();     // singleton
+
+            return &instance.teleopEventLoop;
+        }
+
+        static void cancel(Command* command) {
+            CommandScheduler& instance = getInstance();     // singleton
+
+            // if in run loop, add command to cancel list
+            if (instance.isRunLoop) {
+                instance.toCancel.emplace_back(command);
+            }
+
+            // if the command is scheduled, remove it from schedule, and free up it's requirements
+            if (scheduled(command)) {
+                command->end(true);
+
+                std::erase(instance.scheduledCommands, command); 
+
+                for (auto requirement : command->getRequirements()) {
+                    instance.requirements.erase(requirement);
+                }
+            }
+        }
+
+        inline void Command::schedule() {
+            CommandScheduler::schedule(this);
+        }
+
+        inline void Command::cancel() {
+            CommandScheduler::cancel(this);
+        }
+
+        inline bool Command::scheduled() const { 
+            CommandScheduler::scheduled(this);
+        }
 
 };
