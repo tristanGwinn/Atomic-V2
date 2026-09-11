@@ -132,7 +132,6 @@ class Command {
         // TODO:
 
         /**
-         *
          * @brief See if the command is currently scheduled in the
          * \refitem CommandScheduler
          *
@@ -182,4 +181,48 @@ class Command {
         Command *until(const std::function<bool> &isFinished);
 
         
+        /////
+        //
+        //  BELOW ARE UNIMPLEMENTED FEATURES FROM ECHO'S COMMAND SCHEDULER.
+        ///  We may want to implement some of these later, as desired / needed.
+        ///  At time of writing, I am just aiming for basic functionality that can be expanded upon.
+        //
+        /////
+
+        /**
+         * @brief Create a \refitem ParallelCommandGroup with this and 'other'
+         *
+         * @param other Other command for the \refitem ParallelCommandGroup
+         * @return \refitem ParallelCommandGroup with this and other
+         */
+        // Command *with(Command *other);
+
+        /**
+         * @brief Create a \refitem ParallelRaceGroup with this and other
+         *
+         * @param other Other command for the \refitem ParallelRaceGroup
+         * @return \refitem ParallelRaceGroup with this and other
+         */
+        // Command *race(Command *other);
+
+        /**
+         * @brief Create a \refitem RepeatCommand with this
+         *
+         * @return \refitem RepeatCommand with this
+         */
+        // Command *repeatedly();
+
+        /**
+         * @brief Create a \refitem ProxyCommand with this
+         *
+         * @warning Only use \refitem ProxyCommand where ABSOLUTELY
+         * necessary, it can have unintended side effects. The side
+         * effects are listed in the class documentation
+         * @return \refitem ProxyCommand with this
+         */
+        // Command *asProxy();
+        
+
+        // destructor
+        virtual ~Command() = default;
 };

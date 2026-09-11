@@ -138,11 +138,11 @@ void autonomous() {}
 // stage right lift motor = 13, reversed : (-13)
 // stage left lift motor = 7, forward    : (7)
 atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);
-float lift_percent = 1;
+float lift_percent = 60;
 
 void opcontrol() {
     // temp. code
-	lift_motors.setBrakeMode(atomic::BrakeMode::HOLD);
+	// lift_motors.setBrakeMode(atomic::BrakeMode::HOLD);
 
 	while (true) {
         float leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -152,20 +152,32 @@ void opcontrol() {
     	float right = defaultDriveCurve.curve(leftY - rightX);
     	left_motors.move(left / 127);
     	right_motors.move(right / 127);
+        
 
-        // temp. code start
+        // temp. code for lift
+        /*
+        switch (controller.get_digital_new_release(pros::E_CONTROLLER_DIGITAL_X)) {
+            case 0:
+                lift_percent = 60;
+            case 1:
+                lift_percent = 100;
+            default:
+                break;
+        }
+
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)))
-		{
-			lift_motors.move(lift_percent);
+		{    
+			lift_motors.move(lift_percent / 100);
 		}
 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1) && !(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)))
 		{
-			lift_motors.move(-lift_percent);
+			lift_motors.move(-lift_percent / 100);
 		}
 		else
 		{
 			lift_motors.brake();
 		}
+            */
         // temp. code end
 
     	pros::delay(10);
