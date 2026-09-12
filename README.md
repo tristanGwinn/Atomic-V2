@@ -1,6 +1,6 @@
 # Atomic-V2 (26-27)
 ![alt text](https://github.com/tristanGwinn/Atomic_26-27/blob/main/logo_old.png?raw=true)
-^ Old Logo ^
+<- Old Logo
 
 ## Description
 The VEX V5RC PROS codebase and designed for and by team 45434A Atomic for the 2026-2027 Override VEX season.
