@@ -1,25 +1,23 @@
-# Atomic_26-27
+# Atomic-V2 (26-27)
+![alt text](https://github.com/tristanGwinn/Atomic_26-27/blob/main/logo_old.png?raw=true)
 
 ## Description
 The VEX V5RC PROS codebase and designed for and by team 45434A Atomic for the 2026-2027 Override VEX season.
 
-### Note
-As of now, nothing has been tested, and some functionality may be broken/or unintentionally left unfinished.
+### TODO
+- Clean up code and directory rgb(30, 255, 30)
+- Add functionality to read json files as trajectories rgb(30, 255, 30)
+- Test RAMSETE functionality rgb(255, 255, 60)
+- Add list of current features to README.md rgb(255, 255, 60)
+- Update Atomic logo to new pink version rgb(255, 60, 0)
+- Driver control recording/playback rgb(255, 60, 0)
+#### TODO Color Legend:
+-rgb(0, 255, 255) - Top Priority
+-rgb(30, 255, 30) - High Priority
+-rgb(255, 255, 60) - Medium Priority
+-rgb(255, 60, 0) - Low Priority
+
 
 ### What's New:
-- Most of the code now uses proper units and is formatted consistently
-- Ramsete controller (untested)
-- Realtime motion-profiled trajectory generation
-- Trajectory following
-- Turn to
-- Move to Pose
-- Move to Point
-- Chassis class was removed
-- toAngularVelocity() was added to units class to handle calculating angular velocity
-
-### ToDo
-- Create a formatting guide
-- Driver control recording/playback
-- Verify driver control functionality
-- Review RAMSETE controller code
-- Review and potentially remove atomic::Pose in favor of units::pose
+- Temporary command based control of the lift has been added
+- Added a subsystem / action command scheduler to handle subsystem use
