@@ -1,23 +1,29 @@
 /** 
  * 
- * 45434A VEX Atomic Framework and Codebase
+ * 45434A VEX Atomic Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 9/8/26
+ * Date Updated: 9/12/26
  * Updated By: Tristan Gwinn
  * 
  * ToDo: 
- *  - Add a subsystem / action command scheduler to handle subsystem use (Current Focus)
+ *  - Clean up code and directory (High Prority)
  *  - Add functionality to read json files as trajectories (High Priority)
  * 	- Test RAMSETE functionality (Med Priority)
  *  - Update Atomic logo to new pink version (Low Priority)
  * 	- Driver control recording/playback (Low Priority)
  * 	
  * What's New:
- *  - Robot is drivable
- *  - Temporary operator control of the lift has been added
- * 
+ *  - Temporary command based control of the lift has been added
+ *  - Add a subsystem / action command scheduler to handle subsystem use (Current Focus)
  */
+
+
+/////
+//
+//  To download code on linux, run sudo chmod a+rw after connecting brain / controller
+//
+/////
 
 #include "main.h"
 #include "hardware/IMU/V5InertialSensor.hpp"
@@ -30,8 +36,10 @@
 #include "atomic/trajectory/kinematics.hpp"
 #include "atomic/trajectory/trajectoryGenerator.hpp"
 
+#include "atomic/command/commandController.h"
+#include "atomic/subsystems/lift.h"     // temporary logic
+
 #include "pros/llemu.hpp"
-#include "subsystems.hpp"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 atomic::ExpoDriveCurve defaultDriveCurve(0.0, 1.0, 1.12);
@@ -80,11 +88,37 @@ const atomic::ExitConditionGroup<Length> lateral_exit_conditions({atomic::ExitCo
 const Number angular_slew = 1.0;
 const Number lateral_slew = 1.0;
 
+// Annotated setup for command based lift control:
+CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
+LiftSubsystem *lift;                                    // create lift object
+    atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
+
+// brain image stuff
 LV_IMAGE_DECLARE(logo);
-
-
 bool logoOnBrain = true;
 bool showDebug = true;
+
+
+/**
+ * @brief This function runs the update scheduler at each frame with a consistent schedule
+ *
+ * @warning This function or alternative similar to it must be running to ensure the \refitem CommandScheduler is run
+ */
+[[noreturn]] void update_loop() {
+	// Loop forever
+	while (true) {
+		// Store the start time
+		auto start_time = pros::millis();
+
+		// Run the command scheduler
+		// This might be an expensive(Time wise) computation
+		CommandScheduler::run();
+
+		// Use delay until if this computation ends up being expensive, keeping loop time in check
+		pros::c::task_delay_until(&start_time, 10);
+	}
+}
+
 
 void initialize() {
 	if (logoOnBrain){
@@ -93,28 +127,20 @@ void initialize() {
 		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 	}
 
-    if(imu.isConnected()){
-        imu.calibrate();
-	    odom.startTask();
-    }else{
-        showDebug = false;
-    }
+    // Start the command scheduler task
+    pros::Task commandSchedulerTask(update_loop);
 
-	if (showDebug) pros::lcd::initialize(); // initialize brain screen if needed
+    // store lift motors in lift object
+    lift = new LiftSubsystem(lift_motors);
 
-    while (true) {
-        if (showDebug){
-            // get current pose of the robot
-            const units::Pose pose = odom.getPose();
-            // print pros to the brain screen
-            pros::lcd::print(0, "x: %f", (pose.x));
-            pros::lcd::print(1, "y: %f", (pose.y));
-            pros::lcd::print(2, "theta: %f", (pose.orientation));
-        }
-        
-        // delay to let other tasks run
-        pros::delay(10);
-	}
+    // register subsystem
+    CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
+
+    // Set pctCommand to run while R1 is true
+    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
+
+    // Toggle pctCommand to run while R1 turns to ture
+    primary.getTrigger(DIGITAL_L1)->toggleOnTrue(lift->pctCommand(-1.0));
 
 }
 
@@ -124,18 +150,9 @@ void competition_initialize() {}
 
 void autonomous() {}
 
-// this is here temporarily due to testing needs
-
-// stage right lift motor = 13, reversed : (-13)
-// stage left lift motor = 7, forward    : (7)
-atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);
-float lift_percent = 1;
-
 void opcontrol() {
-    // temp. code
-	lift_motors.setBrakeMode(atomic::BrakeMode::HOLD);
-
-	while (true) {
+    // temporarily disabled for command testing
+	/*while (true) {
         float leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         float rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
@@ -144,22 +161,6 @@ void opcontrol() {
     	left_motors.move(left / 127);
     	right_motors.move(right / 127);
 
-        // temp. code start
-		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)))
-		{
-			lift_motors.move(lift_percent);
-		}
-		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1) && !(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)))
-		{
-			lift_motors.move(-lift_percent);
-		}
-		else
-		{
-			lift_motors.brake();
-		}
-        // temp. code end
-
     	pros::delay(10);
-  	}
-
+  	}*/
 }
