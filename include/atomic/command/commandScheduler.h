@@ -115,7 +115,7 @@ class CommandScheduler {
             CommandScheduler& instance = getInstance();     //singleton
 
             // Run the periodic for all registered subystems
-            for (const auto& pair : instance.subsystem) {
+            for (const auto& pair : instance.subsystems) {
                 pair.first->periodic();
             }
 
@@ -127,11 +127,11 @@ class CommandScheduler {
                 instance.teleopEventLoop.poll(); 
             }
 
-            instance.isRunLoop = true; 
+            instance.inRunLoop = true; 
 
             // exectute commands and then remove ended commands
             for (auto command : instance.scheduledCommands) {
-                command->exectue();
+                command->execute();
 
                 if (command->isFinished()) {
                     command->end(false);
@@ -144,13 +144,13 @@ class CommandScheduler {
                 }
             }
 
-            instance.isRunLoop = false; 
+            instance.inRunLoop = false; 
 
             // cancel and schedule commands
             for (const auto command : instance.toCancel) {
                 cancel(command);
             }
-            for (const auto command : instace.toSchedule) {
+            for (const auto command : instance.toSchedule) {
                 schedule(command);
             }
 
@@ -189,7 +189,7 @@ class CommandScheduler {
             CommandScheduler& instance = getInstance();     // singleton
 
             // if in run loop, add command to cancel list
-            if (instance.isRunLoop) {
+            if (instance.inRunLoop) {
                 instance.toCancel.emplace_back(command);
             }
 
@@ -204,17 +204,16 @@ class CommandScheduler {
                 }
             }
         }
-
-        inline void Command::schedule() {
-            CommandScheduler::schedule(this);
-        }
-
-        inline void Command::cancel() {
-            CommandScheduler::cancel(this);
-        }
-
-        inline bool Command::scheduled() const { 
-            CommandScheduler::scheduled(this);
-        }
-
 };
+
+inline void Command::schedule() {
+	CommandScheduler::schedule(this);
+}
+
+inline void Command::cancel() {
+	CommandScheduler::cancel(this);
+}
+
+inline bool Command::scheduled() const {
+	return CommandScheduler::scheduled(this);
+}
