@@ -18,7 +18,6 @@
  *  - Add a subsystem / action command scheduler to handle subsystem use (Current Focus)
  */
 
-
 /////
 //
 //  To download code on linux, run sudo chmod a+rw after connecting brain / controller
@@ -157,4 +156,3 @@ void competition_initialize() {}
 void autonomous() {}
 
 void opcontrol() {}
-
