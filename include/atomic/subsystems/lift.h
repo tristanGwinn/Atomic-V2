@@ -38,11 +38,11 @@ class LiftSubsystem : public Subsystem {
          */
         RunCommand* pctCommand(const double pct) {
             // Create a new RunCommand
-            // The lambda body is called at every update, in this case setting the intake percentage
+            // The lambda body is called at every update, in this case setting the lift percentage
             return new RunCommand(
                 [this, pct] () // Capture "this" and the percentage request
                 {
-                    this->setPct(pct); // Set the percentage of the intake to the request
+                    this->setPct(pct); // Set the percentage of the lift to the request
                 },
                 {this}  // Add "this", the pointer to this subsystem that is currently running.
                         // It is important to ensure that all subsystems that are being utilized in a command are properly
