@@ -37,12 +37,14 @@
 #include "atomic/trajectory/trajectoryGenerator.hpp"
 
 #include "atomic/command/commandController.h"
-#include "atomic/subsystems/lift.h"     // temporary logic
+
+#include "atomic/subsystems/lift.h"
+#include "atomic/subsystems/drivetrain.h"
 
 #include "pros/llemu.hpp"
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
-atomic::ExpoDriveCurve defaultDriveCurve(0.0, 1.0, 1.12);
+atomic::ExpoDriveCurve driveCurve(0.0, 1.0, 1.12);
 
 // Physical robot variables
 const Length track_width = 11.50_in;
@@ -88,15 +90,17 @@ const atomic::ExitConditionGroup<Length> lateral_exit_conditions({atomic::ExitCo
 const Number angular_slew = 1.0;
 const Number lateral_slew = 1.0;
 
-// Annotated setup for command based lift control:
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
-LiftSubsystem *lift;                                    // create lift object
-    atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
+
+atomic::MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
+
+// Subsystem Objects
+LiftSubsystem *lift;
+DriveSubsystem *drivetrain;
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
-bool logoOnBrain = true;
-bool showDebug = true;
+bool logoOnBrain = false;
 
 
 /**
@@ -126,21 +130,23 @@ void initialize() {
 		lv_image_set_src(img, &logo);
 		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 	}
+    else pros::lcd::initialize();   // to get rid of pros screen run: pros::lcd::shutdown();
 
     // Start the command scheduler task
     pros::Task commandSchedulerTask(update_loop);
 
-    // store lift motors in lift object
+    // add components to subsystems
     lift = new LiftSubsystem(lift_motors);
+    drivetrain = new DriveSubsystem(left_motors, right_motors);
 
-    // register subsystem
+    // register subsystems
+    CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
 
-    // Set pctCommand to run while R1 is true
-    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
+    // primary.getTrigger(ANALOG_LEFT_Y)->whileTrue(lift->pctCommand(1.0));
 
-    // Toggle pctCommand to run while R1 turns to ture
-    primary.getTrigger(DIGITAL_L1)->toggleOnTrue(lift->pctCommand(-1.0));
+    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
+    primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-1.0));
 
 }
 
@@ -150,17 +156,5 @@ void competition_initialize() {}
 
 void autonomous() {}
 
-void opcontrol() {
-    // temporarily disabled for command testing
-	/*while (true) {
-        float leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        float rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+void opcontrol() {}
 
-    	float left = defaultDriveCurve.curve(leftY + rightX);
-    	float right = defaultDriveCurve.curve(leftY - rightX);
-    	left_motors.move(left / 127);
-    	right_motors.move(right / 127);
-
-    	pros::delay(10);
-  	}*/
-}

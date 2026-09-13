@@ -1,7 +1,7 @@
 #pragma once
 
-#include "command/command.h"
-#include "command/runCommand.h"
+#include "atomic/command/command.h"
+#include "atomic/command/runCommand.h"
 
 #include "hardware/Motor/MotorGroup.hpp"
 
