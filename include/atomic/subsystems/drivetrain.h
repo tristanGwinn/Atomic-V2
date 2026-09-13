@@ -46,6 +46,8 @@ class DriveSubsystem : public Subsystem {
         void setPct(const double pct_left, const double pct_right) {
             this->left_motors.move(pct_left);
             this->right_motors.move(pct_right);
+            pros::lcd::print(0, "left percent: %f", pct_left);
+            pros::lcd::print(0, "right percent: %f", pct_right);
         }
 
         RunCommand* pctCommand(const double left, const double right) {
