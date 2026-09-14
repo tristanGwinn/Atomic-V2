@@ -5,7 +5,7 @@
 #include "pros/adi.hpp"
 #include "pros/rtos.hpp"
 
-namespace atomic {
+
 /**
  * @brief Encoder implementation for the Optical Shaft Encoder
  *
@@ -20,7 +20,7 @@ class ADIEncoder : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
+         *     lemlib::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
          * }
          * @endcode
          */
@@ -35,7 +35,7 @@ class ADIEncoder : public Encoder {
          * @code {.cpp}
          * void initialize() {
          *     // optical shaft encoder on ports 'a' and 'b', which is reversed
-         *     atomic::ADIEncoder encoder({'a', 'b'}, true);
+         *     lemlib::ADIEncoder encoder({'a', 'b'}, true);
          * }
          * @endcode
          */
@@ -53,7 +53,7 @@ class ADIEncoder : public Encoder {
          *     // optical shaft encoder on an ADI Expander
          *     // ADIExpander port: 2, top port: 'c', bottom port: 'd'
          *     // encoder is not reversed
-         *     atomic::ADIEncoder(2, {'c', 'd'}, false);
+         *     lemlib::ADIEncoder(2, {'c', 'd'}, false);
          * }
          * @endcode
          */
@@ -99,7 +99,7 @@ class ADIEncoder : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
+         *     lemlib::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
          *     const Angle angle = encoder.getAngle();
          *     if (angle == INFINITY) {
          *         std::cout << "Error getting relative angle!" << std::endl;
@@ -127,7 +127,7 @@ class ADIEncoder : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
+         *     lemlib::ADIEncoder encoder = pros::adi::Encoder('A', 'B');
          *     const int result = encoder.setAngle(0_stDeg);
          *     if (result == 0) {
          *         std::cout << "Relative angle set!" << std::endl;
@@ -144,4 +144,3 @@ class ADIEncoder : public Encoder {
         pros::adi::Encoder m_encoder;
         Angle m_offset = 0_stDeg;
 };
-} // namespace atomic

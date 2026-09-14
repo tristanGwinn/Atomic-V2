@@ -4,7 +4,7 @@
 #include "units/Angle.hpp"
 #include "pros/rtos.hpp"
 
-namespace atomic {
+
 class IMU : public Device {
     public:
         /**
@@ -92,4 +92,4 @@ class IMU : public Device {
         mutable pros::Mutex m_mutex;
         Number m_gyroScalar;
 };
-} // namespace atomic
+

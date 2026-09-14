@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace atomic {
+
 /**
  * @brief abstract Device class
  *
@@ -12,4 +12,4 @@ class Device {
     public:
         virtual int32_t isConnected() const = 0;
 };
-} // namespace atomic
+

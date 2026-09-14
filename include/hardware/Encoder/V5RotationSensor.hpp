@@ -4,7 +4,7 @@
 #include "hardware/Port.hpp"
 #include "pros/rotation.hpp"
 
-namespace atomic {
+
 /**
  * @brief Encoder implementation for the V5 Rotation sensor
  *
@@ -20,7 +20,7 @@ class V5RotationSensor : public Encoder {
          * @code {.cpp}
          * void initialize() {
          *     // rotation sensor on port 1, which is reversed
-         *     atomic::V5RotationSensor encoder(-1);
+         *     lemlib::V5RotationSensor encoder(-1);
          * }
          * @endcode
          */
@@ -42,7 +42,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = atomic::V5RotationSensor::from_pros_rot(pros::Rotation(1));
+         *     lemlib::V5RotationSensor encoder = lemlib::V5RotationSensor::from_pros_rot(pros::Rotation(1));
          * }
          * @endcode
          */
@@ -56,7 +56,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = pros::Rotation(1);
+         *     lemlib::V5RotationSensor encoder = pros::Rotation(1);
          *     const int result = encoder.isConnected();
          *     if (result == 1) {
          *         std::cout << "Encoder is connected!" << std::endl;
@@ -86,7 +86,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = pros::Rotation(1);
+         *     lemlib::V5RotationSensor encoder = pros::Rotation(1);
          *     const Angle angle = encoder.getAngle();
          *     if (angle == INFINITY) {
          *         std::cout << "Error getting relative angle!" << std::endl;
@@ -115,7 +115,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = pros::Rotation(1);
+         *     lemlib::V5RotationSensor encoder = pros::Rotation(1);
          *     if (encoder.setAngle(0_stDeg) == 0) {
          *         std::cout << "Relative angle set!" << std::endl;
          *         std::cout < "Relative angle: " << encoder.getAngle().convert(deg) << std::endl; // outputs 0
@@ -135,7 +135,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = pros::Rotation(1);
+         *     lemlib::V5RotationSensor encoder = pros::Rotation(1);
          *     const int result = encoder.isReversed();
          *     if (result == 0) {
          *         std::cout << "Rotation sensor is not reversed" << std::endl;
@@ -160,7 +160,7 @@ class V5RotationSensor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5RotationSensor encoder = pros::Rotation(1);
+         *     lemlib::V5RotationSensor encoder = pros::Rotation(1);
          *     // reverse the encoder
          *     encoder.setReversed(true);
          * }
@@ -173,4 +173,3 @@ class V5RotationSensor : public Encoder {
         bool m_reversed;
         int m_port;
 };
-} // namespace atomic
