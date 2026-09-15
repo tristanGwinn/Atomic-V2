@@ -60,8 +60,8 @@ atomic::DifferentialKinematics robot_kinematics(
                                     2.0         // friction coefficient
                                 );
 
-atomic::MotorGroup left_motors({-11, -12}, 450_rpm);
-atomic::MotorGroup right_motors({20, 19}, 450_rpm);
+atomic::MotorGroup left_motors({-10, -9}, 450_rpm);
+atomic::MotorGroup right_motors({3, 2}, 450_rpm);
 
 atomic::V5InertialSensor imu(2);
 
@@ -122,7 +122,6 @@ bool logoOnBrain = false;
 	}
 }
 
-
 void initialize() {
 	if (logoOnBrain){
 		lv_obj_t *img = lv_image_create(lv_screen_active());
@@ -142,11 +141,8 @@ void initialize() {
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
 
-    // primary.getTrigger(ANALOG_LEFT_Y)->whileTrue(lift->pctCommand(1.0));
-
     primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
     primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-1.0));
-
 }
 
 void disabled() {}

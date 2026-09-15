@@ -26,7 +26,8 @@ class DriveSubsystem : public Subsystem {
         }
 
         explicit DriveSubsystem(atomic::MotorGroup &leftmotors, atomic::MotorGroup &rightmotors)
-        : left_motors(leftmotors), right_motors(rightmotors) {
+        : left_motors(leftmotors), right_motors(rightmotors)
+        {
             resetAngle();  
         }
 
@@ -47,7 +48,7 @@ class DriveSubsystem : public Subsystem {
             this->left_motors.move(pct_left);
             this->right_motors.move(pct_right);
             pros::lcd::print(0, "left percent: %f", pct_left);
-            pros::lcd::print(0, "right percent: %f", pct_right);
+            pros::lcd::print(1, "right percent: %f", pct_right);
         }
 
         RunCommand* pctCommand(const double left, const double right) {
