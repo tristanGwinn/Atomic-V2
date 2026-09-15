@@ -40,10 +40,3 @@ extern MotorGroup left_motors;
 extern MotorGroup right_motors;
 
 extern V5InertialSensor imu;
-
-// PID variables
-// extern const ExitConditionGroup<AngleRange> angular_exit_conditions;
-// extern const ExitConditionGroup<Length> lateral_exit_conditions;
-
-// extern const Number angular_slew;
-// extern const Number lateral_slew;

@@ -39,22 +39,14 @@
 #include "driveCurve.hpp"
 #include "motionConfig.hpp"
 #include "chassis/odom.hpp"
+#include "subsystems.h"
 
 #include "motions/ramseteTrajectoryFollower.hpp"
 
 #include "trajectory/kinematics.hpp"
 #include "trajectory/trajectoryGenerator.hpp"
 
-#include "command/commandController.h"
-
-#include "subsystems/lift.h"
-#include "subsystems/drivetrain.h"
-#include "subsystems/arm.h"
-
 #include "pros/llemu.hpp"
-
-pros::Controller controller(pros::E_CONTROLLER_MASTER);
-ExpoDriveCurve driveCurve(0.0, 1.0, 1.12);
 
 // Physical robot variables
 const Length track_width = 11.50_in;
@@ -71,72 +63,11 @@ DifferentialKinematics robot_kinematics(
                                     2.0         // friction coefficient
                                 );
 
-MotorGroup left_motors({-11, -12}, 450_rpm);
-MotorGroup right_motors({20, 19}, 450_rpm);
-
-V5InertialSensor imu(2);
-
-TrackingWheel vertical_tracker(
-                                ReversibleSmartPort(20),    // tracking port
-                                wheel_diameter,                     // diameter
-                                track_width / 2                     // offset
-                            );
-
-TrackingWheel horizontal_tracker(
-                                ReversibleSmartPort(18),    // tracking port
-                                2.0_in,                             // diameter
-                                -3.0_in                             // offset
-                            );
-
 Odometry odom({&imu}, {&vertical_tracker}, {&horizontal_tracker});
-
-// PID variables
-// extern const PID angular_pid(0.05, 0, 0);
-// extern const PID lateral_pid(0.05, 0, 0);
-
-const ExitConditionGroup<AngleRange> angular_exit_conditions({ExitCondition<AngleRange>(0.5_cDeg, 1000_msec)});
-const ExitConditionGroup<Length> lateral_exit_conditions({ExitCondition(1.0_in, 2000_msec)});
-
-const Number angular_slew = 1.0;
-const Number lateral_slew = 1.0;
-
-CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
-
-MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
-
-MotorGroup arm_motors({6, -4}, 600_rpm);
-pros::Imu arm_imu(10);
-
-// Subsystem Objects
-LiftSubsystem *lift;
-DriveSubsystem *drivetrain;
-ArmSubsystem *arm;
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
 bool logoOnBrain = false;
-
-
-/**
- * @brief This function runs the update scheduler at each frame with a consistent schedule
- *
- * @warning This function or alternative similar to it must be running to ensure the \refitem CommandScheduler is run
- */
-[[noreturn]] void update_loop() {
-	// Loop forever
-	while (true) {
-		// Store the start time
-		auto start_time = pros::millis();
-
-		// Run the command scheduler
-		// This might be an expensive(Time wise) computation
-		CommandScheduler::run();
-
-		// Use delay until if this computation ends up being expensive, keeping loop time in check
-		pros::c::task_delay_until(&start_time, 10);
-	}
-}
-
 
 void initialize() {
 	if (logoOnBrain){
@@ -149,17 +80,8 @@ void initialize() {
     // Start the command scheduler task
     pros::Task commandSchedulerTask(update_loop);
 
-    // add components to subsystems
-    lift = new LiftSubsystem(lift_motors);
-    drivetrain = new DriveSubsystem(left_motors, right_motors);
-    // arm = new ArmSubsystem(arm_motors, arm_imu);
-
-    // register subsystems
-    CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
-    CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
-
-    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
-    primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-1.0));
+    // setup and register subsystems and triggers
+    initializeSubsystems();
 
 }
 

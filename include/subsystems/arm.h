@@ -12,7 +12,6 @@ class ArmSubsystem : public Subsystem {
     private:
         MotorGroup motor;
         pros::Imu imu;
-        pros::Imu chassis_imu;
 
         PID pid;
 
@@ -20,7 +19,7 @@ class ArmSubsystem : public Subsystem {
         std::optional<double> target;
 
     public:
-        explicit ArmSubsystem(MotorGroup &motors, pros::Imu &inertial, pros::Imu &chassis_inertial, const PID &pid)
+        explicit ArmSubsystem(MotorGroup &motors, pros::Imu &inertial, const PID &pid)
          : motor(motors), imu(inertial), chassis_imu(chassis_inertial), pid(pid) {
             motor.setAngle(0_stDeg);
             imu.reset();
