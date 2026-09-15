@@ -36,10 +36,13 @@ class ArmSubsystem : public Subsystem {
         }
 
         Angle getPosition() const {
-            // Return roll of imu minus the drivetrain imu rotation 
-            // to-do
-            
-            return from_stDeg(imu.get_roll());
+            // to-do: consider the imu rotation of the chassis
+
+            // convert the roll into rotation relative to initial rotation (tuned constant)
+            // 35 should be replaced with a tuned constant defined elsewhere
+            auto pos = (imu.get_roll() < 0) 
+                       180*2 + imu.get_roll() + 35 : imu.get_roll() - 35; 
+            return from_stDeg(pos);    
         }
 
         void setTarget(Angle target) {
