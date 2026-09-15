@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exitCondition.hpp"
-#include "pid.hpp"
+#include "controllers/pid.hpp"
 
 #include "controllers/ramsete.hpp"
 #include "trajectory/kinematics.hpp"
@@ -17,8 +17,8 @@
 
 // controller objects
 
-extern const PID angular_pid;
-extern const PID lateral_pid;
+// extern const PID angular_pid;
+// extern const PID lateral_pid;
 
 // extern const RameseteFollowSettings ramsete_settings;
 
@@ -42,8 +42,8 @@ extern MotorGroup right_motors;
 extern V5InertialSensor imu;
 
 // PID variables
-extern const ExitConditionGroup<AngleRange> angular_exit_conditions;
-extern const ExitConditionGroup<Length> lateral_exit_conditions;
+// extern const ExitConditionGroup<AngleRange> angular_exit_conditions;
+// extern const ExitConditionGroup<Length> lateral_exit_conditions;
 
-extern const Number angular_slew;
-extern const Number lateral_slew;
+// extern const Number angular_slew;
+// extern const Number lateral_slew;

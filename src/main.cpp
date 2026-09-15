@@ -11,6 +11,8 @@
  * What's new:
  *  - Removed namespace "atomic" and "include/atomic/"
  *  - moved lose files to "deprecate/" in both "src/" and "include/"
+ *  - modified pid.hpp and removed pid.cpp
+ *  - created arm subsystem
  * 
  * Task to-do:
  *  - Create dedicated file for Command and subsystem initalization
@@ -33,7 +35,7 @@
 /////
 
 #include "main.h"
-#include "hardware/IMU/V5InertialSensor.hpp"
+#include "pros/imu.hpp"
 #include "driveCurve.hpp"
 #include "motionConfig.hpp"
 #include "chassis/odom.hpp"
@@ -47,6 +49,7 @@
 
 #include "subsystems/lift.h"
 #include "subsystems/drivetrain.h"
+#include "subsystems/arm.h"
 
 #include "pros/llemu.hpp"
 
@@ -88,8 +91,8 @@ TrackingWheel horizontal_tracker(
 Odometry odom({&imu}, {&vertical_tracker}, {&horizontal_tracker});
 
 // PID variables
-extern const PID angular_pid(0.05, 0, 0);
-extern const PID lateral_pid(0.05, 0, 0);
+// extern const PID angular_pid(0.05, 0, 0);
+// extern const PID lateral_pid(0.05, 0, 0);
 
 const ExitConditionGroup<AngleRange> angular_exit_conditions({ExitCondition<AngleRange>(0.5_cDeg, 1000_msec)});
 const ExitConditionGroup<Length> lateral_exit_conditions({ExitCondition(1.0_in, 2000_msec)});
@@ -101,9 +104,13 @@ CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller fo
 
 MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
 
+MotorGroup arm_motors({6, -4}, 600_rpm);
+pros::Imu arm_imu(10);
+
 // Subsystem Objects
 LiftSubsystem *lift;
 DriveSubsystem *drivetrain;
+ArmSubsystem *arm;
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
@@ -145,12 +152,11 @@ void initialize() {
     // add components to subsystems
     lift = new LiftSubsystem(lift_motors);
     drivetrain = new DriveSubsystem(left_motors, right_motors);
+    // arm = new ArmSubsystem(arm_motors, arm_imu);
 
     // register subsystems
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
-
-    // primary.getTrigger(ANALOG_LEFT_Y)->whileTrue(lift->pctCommand(1.0));
 
     primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
     primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-1.0));
