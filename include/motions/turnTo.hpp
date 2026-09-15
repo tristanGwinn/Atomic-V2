@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "motionConfig.hpp"
+#include "config.hpp"
 #include "util.hpp"
 #include <functional>
 
@@ -27,7 +27,7 @@ struct TurnToParams {
          * accurate but smoother ones. Value between 0-1. 0 by default */
         Number minSpeed = 0;
         /** how much the power (from -1 to +1) can increase per second. Defaults to 0 */
-        Number slew = angular_slew;
+        Number slew = 1.0;
         /** angle between the robot and target point where the movement will exit. Only has an effect if minSpeed is
          * non-zero.*/
         AngleRange earlyExitRange = 0_cRot;
@@ -42,9 +42,9 @@ struct TurnToParams {
  */
 struct TurnToSettings {
         /** the angular PID that is used to turn the robot */
-        PID angularPID = angular_pid;
+        PID angularPID;
         /** the exit conditions that will cause the robot to stop moving */
-        ExitConditionGroup<AngleRange> exitConditions = angular_exit_conditions;
+        ExitConditionGroup<AngleRange> exitConditions;
         /** this function should return the estimated pose of the robot, typically by the tracking wheel odometry. */
         std::function<units::Pose()> poseGetter = pose_getter;
         /** the left motor group of the drivetrain */

@@ -1,4 +1,4 @@
-#include "ramsete/ramseteController.hpp"
+#include "controllers/ramsete.hpp"
 #include "util.hpp"
 
 #include <cmath>

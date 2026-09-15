@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config.h"
+#include "config.hpp"
 #include "command/commandController.h"
 
 #include "subsystems/lift.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "motionConfig.hpp"
+#include "config.hpp"
 
 struct RameseteFollowSettings {
         RamseteController ramseteController = ramsete_controller;

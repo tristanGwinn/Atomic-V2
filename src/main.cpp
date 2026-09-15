@@ -36,34 +36,17 @@
 
 #include "main.h"
 #include "pros/imu.hpp"
-#include "driveCurve.hpp"
-#include "motionConfig.hpp"
+#include "deprecate/driveCurve.hpp"
+#include "config.hpp"
 #include "chassis/odom.hpp"
-#include "subsystems.h"
+#include "subsystems/subsystems.h"
 
-#include "motions/ramseteTrajectoryFollower.hpp"
+// #include "motions/ramseteTrajectoryFollower.hpp"
 
 #include "trajectory/kinematics.hpp"
 #include "trajectory/trajectoryGenerator.hpp"
 
 #include "pros/llemu.hpp"
-
-// Physical robot variables
-const Length track_width = 11.50_in;
-const Length wheel_diameter = 2.75_in;
-const AngularVelocity max_rpm = 450_rpm;
-
-const LinearVelocity max_vel = 64.8_inps;           // max_vel = wheel_diameter * PI * max_rpm / 60_sec
-const LinearAcceleration max_accel = 3.40_mps2;     // max_accel = drivetrain force at max rpm / robot mass
-
-DifferentialKinematics robot_kinematics(
-                                    track_width,
-                                    max_vel,
-                                    max_accel,
-                                    2.0         // friction coefficient
-                                );
-
-Odometry odom({&imu}, {&vertical_tracker}, {&horizontal_tracker});
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
@@ -74,8 +57,7 @@ void initialize() {
 		lv_obj_t *img = lv_image_create(lv_screen_active());
 		lv_image_set_src(img, &logo);
 		lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-	}
-    else pros::lcd::initialize();   // to get rid of pros screen run: pros::lcd::shutdown();
+	}else pros::lcd::initialize();   // to get rid of pros screen run: pros::lcd::shutdown();
 
     // Start the command scheduler task
     pros::Task commandSchedulerTask(update_loop);

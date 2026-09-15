@@ -1,27 +1,27 @@
 #pragma once
 
-#include "motionConfig.hpp"
+#include "config.hpp"
 #include <functional>
 
 
 
 struct MoveToPoseParams {
         bool reversed = false;
-        Number driftCompensation = drift_compensation;
+        Number driftCompensation = 2.0;
         Number lead = 0.6;
         Number maxLateralSpeed = 1;
         Number minLateralSpeed = 0;
         Number maxAngularSpeed = 1;
-        Number lateralSlew = lateral_slew;
-        Number angularSlew = angular_slew;
+        Number lateralSlew = 1.0;
+        Number angularSlew = 1.0;
         Length earlyExitRange = 0_in;
 };
 
 struct MoveToPoseSettings {
-        PID angularPID = angular_pid;
-        PID lateralPID = lateral_pid;
-        ExitConditionGroup<Length> lateralExitConditions = lateral_exit_conditions;
-        ExitConditionGroup<AngleRange> angularExitConditions = angular_exit_conditions;
+        PID angularPID;
+        PID lateralPID;
+        ExitConditionGroup<Length> lateralExitConditions;
+        ExitConditionGroup<AngleRange> angularExitConditions;
         std::function<units::Pose()> poseGetter = pose_getter;
         MotorGroup& leftMotors = left_motors;
         MotorGroup& rightMotors = right_motors;
