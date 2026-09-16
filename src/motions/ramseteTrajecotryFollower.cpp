@@ -8,6 +8,7 @@ using namespace units;
 
 // static logger::Helper logHelper("atomic/motions/followTrajectory");
 
+/*
 void followTrajectory(const Trajectory& t, RameseteFollowSettings settings) {
     std::vector<Trajectory::State> states = t.states();
     
@@ -52,3 +53,5 @@ void followTrajectory(const Trajectory& t, RameseteFollowSettings settings) {
     left_motors.brake();
     right_motors.brake();
 }
+
+*/

@@ -9,7 +9,7 @@ using namespace units;
 
 
 // static logger::Helper logHelper("atomic/motions/moveToPoint");
-
+/*
 void moveToPoint(V2Position target, Time timeout, MoveToPointParams params, MoveToPointSettings settings) {
     // logHelper.info("moving to point {}", target);
 
@@ -99,3 +99,5 @@ void moveToPoint(V2Position target, Time timeout, MoveToPointParams params, Move
     settings.leftMotors.brake();
     settings.rightMotors.brake();
 }
+
+*/

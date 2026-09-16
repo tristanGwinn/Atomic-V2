@@ -3,20 +3,25 @@
  * 45434A VEX Atomic Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 9/14/26
+ * Date Updated: 9/16/26
  * Updated By: Tristan Gwinn
  * 
  * Current Task: Clean up code and directory
  * 
- * What's new:
+ * Completed:
+ *  - Rewrote odom math to work inside of the drivetrain periodic
+ *  - Rewrote drive curve functionality to be inside of drivetrain.h
+ *  - modified pid.hpp and removed pid.cpp
+ *  - Move robot config variables out of main.cpp
+ *  - Got rid of trackingWheel.cpp
+ * 
  *  - Removed namespace "atomic" and "include/atomic/"
  *  - moved lose files to "deprecate/" in both "src/" and "include/"
- *  - modified pid.hpp and removed pid.cpp
  *  - created arm subsystem
+ *  
  * 
  * Task to-do:
  *  - Create dedicated file for Command and subsystem initalization
- *  - Move robot config variables out of main.cpp
  *  - Remove lemlib style motion handling and replace with command based motions
  *  - Implement Commands where possible and update/remove files in "deprecate/"
  * 
@@ -36,15 +41,8 @@
 
 #include "main.h"
 #include "pros/imu.hpp"
-#include "deprecate/driveCurve.hpp"
 #include "config.hpp"
-#include "chassis/odom.hpp"
 #include "subsystems/subsystems.h"
-
-// #include "motions/ramseteTrajectoryFollower.hpp"
-
-#include "trajectory/kinematics.hpp"
-#include "trajectory/trajectoryGenerator.hpp"
 
 #include "pros/llemu.hpp"
 

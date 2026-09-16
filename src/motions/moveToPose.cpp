@@ -6,6 +6,7 @@
 
 using namespace units;
 
+/*
 void moveToPose(units::Pose target, Time timeout, MoveToPoseParams params, MoveToPoseSettings settings) {
     // initialize persistent variables
     units::Pose lastPose = settings.poseGetter();
@@ -115,3 +116,5 @@ void moveToPose(units::Pose target, Time timeout, MoveToPoseParams params, MoveT
     settings.leftMotors.brake();
     settings.rightMotors.brake();
 }
+
+*/

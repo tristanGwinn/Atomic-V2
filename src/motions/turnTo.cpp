@@ -21,7 +21,8 @@ using namespace units;
  *
  * @return Angle the angular error
  */
-static Angle calculateError(std::variant<Angle, V2Position> target, const units::Pose& pose,
+
+/*static Angle calculateError(std::variant<Angle, V2Position> target, const units::Pose& pose,
                             std::optional<AngularDirection> direction = std::nullopt) {
     // if the target is an angle
     if (std::holds_alternative<Angle>(target)) return angleError(std::get<Angle>(target), pose.orientation, direction);
@@ -123,3 +124,5 @@ void turnTo(std::variant<Angle, V2Position> target, Time timeout, TurnToParams p
     settings.leftMotors.brake();
     settings.rightMotors.brake();
 }
+
+*/

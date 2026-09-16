@@ -17,9 +17,9 @@ struct MoveToPointSettings {
         PID angularPID;
         PID lateralPID;
         ExitConditionGroup<Length> exitConditions;
-        std::function<units::Pose()> poseGetter = pose_getter;
-        MotorGroup& leftMotors = left_motors;
-        MotorGroup& rightMotors = right_motors;
+        std::function<units::Pose()> poseGetter;
+        MotorGroup& leftMotors;
+        MotorGroup& rightMotors;
 };
 
 void moveToPoint(units::V2Position target, Time timeout, MoveToPointParams params, MoveToPointSettings settings);

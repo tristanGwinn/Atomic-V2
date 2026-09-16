@@ -100,7 +100,7 @@ float random_float(float min, float max);
  * @return int - -1 if negative, 1 if positive
  *
  */
-/*template <typename T>*/ constexpr Number sgn(Number value) { return value < 0.0 ? -1.0 : 1.0; }
+// constexpr Number sgn(Number value) { return value < 0.0 ? -1.0 : 1.0; }
 
 /**
  * @brief Return the average of a vector of numbers

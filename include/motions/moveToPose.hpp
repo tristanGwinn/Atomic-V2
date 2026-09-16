@@ -22,9 +22,9 @@ struct MoveToPoseSettings {
         PID lateralPID;
         ExitConditionGroup<Length> lateralExitConditions;
         ExitConditionGroup<AngleRange> angularExitConditions;
-        std::function<units::Pose()> poseGetter = pose_getter;
-        MotorGroup& leftMotors = left_motors;
-        MotorGroup& rightMotors = right_motors;
+        std::function<units::Pose()> poseGetter;
+        MotorGroup& leftMotors;
+        MotorGroup& rightMotors;
 };
 
 void moveToPose(units::Pose target, Time timeout, MoveToPoseParams params, MoveToPoseSettings settings);

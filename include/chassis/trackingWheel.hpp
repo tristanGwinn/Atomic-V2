@@ -1,26 +1,22 @@
 #pragma once
 
-#include "hardware/Encoder/Encoder.hpp"
-#include "hardware/Motor/Motor.hpp"
-#include "hardware/Motor/MotorGroup.hpp"
-#include "pros/adi.hpp"
 #include "pros/rotation.hpp"
+
+#include "hardware/Encoder/Encoder.hpp"
+#include "hardware/Encoder/V5RotationSensor.hpp"
 
 #include "units/units.hpp"
 #include "units/Angle.hpp"
 
 class TrackingWheel {
+    private:
+        Encoder* m_encoder;
+        Length m_diameter;
+        Length m_offset;
+        Number m_ratio;
+        Length m_lastTotal;
+
     public:
-        /**
-         * @brief Create a new tracking wheel
-         *
-         * @param encoder the encoder to use for tracking
-         * @param diameter the diameter of the wheel
-         * @param offset distance between the tracking wheel and the center of rotation in inches
-         * @param ratio gear ratio of the tracking wheel, defaults to 1
-         */
-        TrackingWheel(Encoder* encoder, Length diameter, Length distance, Number ratio = 1);
-        
         /**
          * @brief Create a new tracking wheel
          *
@@ -29,7 +25,12 @@ class TrackingWheel {
          * @param offset distance between the tracking wheel and the center of rotation in inches
          * @param ratio gear ratio of the tracking wheel, defaults to 1
          */
-        TrackingWheel(ReversibleSmartPort port, Length diameter, Length offset, Number ratio = 1);
+        TrackingWheel(ReversibleSmartPort port, Length diameter, Length offset, Number ratio = 1)
+        : m_encoder(new V5RotationSensor(port)),
+          m_diameter(diameter),
+          m_offset(offset),
+          m_ratio(ratio),
+          m_lastTotal(to_stRot(m_encoder->getAngle()) * M_PI * diameter * m_ratio) {}
         
         /**
          * @brief reset the tracking wheel encoder
@@ -39,7 +40,7 @@ class TrackingWheel {
          *
          * @return INT_MAX an error has occurred, possibly setting errno
          */
-        int reset();
+        int reset() { return m_encoder->setAngle(0_stDeg); }
 
         /**
          * @brief Get the distance traveled by the tracking wheel since this function was last called.
@@ -54,26 +55,26 @@ class TrackingWheel {
          * @return Length the distance the tracking wheel has traveled since the last time
          * the function was called
          */
-        Length getDistanceDelta();
+        Length getDistanceDelta() {
+            // calculate delta
+            const Length total = this->getDistanceTraveled();
+            const Length delta = total - m_lastTotal;
+            m_lastTotal = total;
+            // return the delta
+            return delta;
+        }
 
         /**
          * @brief Get the distance traveled by the tracking wheel
          *
          * @return float distance traveled in inches
          */
-        Length getDistanceTraveled();
+        Length getDistanceTraveled() { return to_stRot(m_encoder->getAngle()) * M_PI * m_diameter * m_ratio; }
 
         /**
          * @brief Get the offset of the tracking wheel from the center of rotation
          *
          * @return float offset in inches
          */
-        Length getOffset();
-
-    private:
-        Encoder* m_encoder;
-        Length m_diameter;
-        Length m_offset;
-        Number m_ratio;
-        Length m_lastTotal;
+        Length getOffset() { return m_offset; }
 };

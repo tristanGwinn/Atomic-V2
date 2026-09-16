@@ -46,11 +46,11 @@ struct TurnToSettings {
         /** the exit conditions that will cause the robot to stop moving */
         ExitConditionGroup<AngleRange> exitConditions;
         /** this function should return the estimated pose of the robot, typically by the tracking wheel odometry. */
-        std::function<units::Pose()> poseGetter = pose_getter;
+        std::function<units::Pose()> poseGetter;
         /** the left motor group of the drivetrain */
-        MotorGroup& leftMotors = left_motors;
+        MotorGroup& leftMotors;
         /** the right motor group of the drivetrain */
-        MotorGroup& rightMotors = right_motors;
+        MotorGroup& rightMotors;
 };
 
 /**

@@ -20,7 +20,7 @@ class ArmSubsystem : public Subsystem {
 
     public:
         explicit ArmSubsystem(MotorGroup &motors, pros::Imu &inertial, const PID &pid)
-         : motor(motors), imu(inertial), chassis_imu(chassis_inertial), pid(pid) {
+         : motor(motors), imu(inertial), pid(pid) {
             motor.setAngle(0_stDeg);
             imu.reset();
         }
@@ -39,7 +39,7 @@ class ArmSubsystem : public Subsystem {
 
             // convert the roll into rotation relative to initial rotation (tuned constant)
             // 35 should be replaced with a tuned constant defined elsewhere
-            auto pos = (imu.get_roll() < 0) 
+            auto pos = (imu.get_roll() < 0) ?
                        180*2 + imu.get_roll() + 35 : imu.get_roll() - 35; 
             return from_stDeg(pos);    
         }

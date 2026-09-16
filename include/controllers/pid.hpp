@@ -11,9 +11,9 @@
  * @param kD derivative gain
  */
 struct Gains {
-        Number kP = 0;
-        Number kI = 0;
-        Number kD = 0;
+        double kP = 0;
+        double kI = 0;
+        double kD = 0;
 };
 
 class PID {
@@ -27,7 +27,7 @@ class PID {
          * @param windupRange integral anti windup range
          * @param signFlipReset whether to reset integral when sign of error flips
          */
-        PID(const Number kP, Number kI, Number kD, Number windupRange, bool signFlipReset)
+        PID(const double kP, const double kI, const double kD, const double windupRange, bool signFlipReset)
          : m_gains({kP, kI, kD}), m_windupRange(windupRange), m_signFlipReset(signFlipReset) {}
 
         /**
@@ -82,7 +82,7 @@ class PID {
             // calculate dt-scaled integral
             m_integral += m_error * to_sec(dt);
             // if the sign of error changed, wipe integral
-            if (sgn(m_error) != sgn((m_previousError)) && m_signFlipReset) m_integral = 0;
+            if (units::sgn(m_error) != units::sgn((m_previousError)) && m_signFlipReset) m_integral = 0;
             // apply anti windup range
             if (abs(m_error) > m_windupRange && m_windupRange != 0) m_integral = 0;
 
