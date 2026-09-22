@@ -43,28 +43,6 @@
 LV_IMAGE_DECLARE(logo);
 bool logoOnBrain = false;
 
-
-/**
- * @brief This function runs the update scheduler at each frame with a consistent schedule
- *
- * @warning This function or alternative similar to it must be running to ensure the \refitem CommandScheduler is run
- */
-[[noreturn]] void update_loop() {
-	// Loop forever
-	while (true) {
-		// Store the start time
-		auto start_time = pros::millis();
-
-		// Run the command scheduler
-		// This might be an expensive(Time wise) computation
-		CommandScheduler::run();
-
-		// Use delay until if this computation ends up being expensive, keeping loop time in check
-		pros::c::task_delay_until(&start_time, 10);
-	}
-}
-
-
 void initialize() {
 	if (logoOnBrain){
 		lv_obj_t *img = lv_image_create(lv_screen_active());
