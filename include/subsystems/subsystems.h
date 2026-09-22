@@ -13,8 +13,8 @@
 
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
-MotorGroup left_motors({-11, -12}, 450_rpm);
-MotorGroup right_motors({20, 19}, 450_rpm);
+MotorGroup left_motors({-10, -9}, 450_rpm);
+MotorGroup right_motors({3, 2}, 450_rpm);
 pros::Imu imu(2);
 
 
