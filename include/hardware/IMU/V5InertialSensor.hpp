@@ -4,7 +4,7 @@
 #include "hardware/IMU/IMU.hpp"
 #include "pros/imu.hpp"
 
-namespace atomic {
+
 class V5InertialSensor : public IMU {
     public:
         /**
@@ -17,7 +17,7 @@ class V5InertialSensor : public IMU {
          * @code {.cpp}
          * void initialize() {
          *    // Create a new V5 Inertial Sensor on port 1
-         *    atomic::V5InertialSensor imu(1);
+         *    lemlib::V5InertialSensor imu(1);
          * }
          * @endcode
          */
@@ -41,7 +41,7 @@ class V5InertialSensor : public IMU {
          * @code {.cpp}
          * void initialize() {
          *    // Create a new V5 Inertial Sensor on port 1
-         *    atomic::V5InertialSensor imu = atomic::V5InertialSensor::from_pros_imu(pros::Imu(1));
+         *    lemlib::V5InertialSensor imu = lemlib::V5InertialSensor::from_pros_imu(pros::Imu(1));
          * }
          * @endcode
          */
@@ -64,7 +64,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *    atomic::V5InertialSensor imu = pros::Imu(1);
+         *    lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *    if (imu.calibrate() == 0) {
          *        std::cout << "IMU calibration started" << std::endl;
@@ -87,7 +87,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *    atomic::V5InertialSensor imu = pros::Imu(1);
+         *    lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *    if (imu.isCalibrated()) {
          *        std::cout << "IMU is calibrated" << std::endl;
@@ -110,7 +110,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *    atomic::V5InertialSensor imu = pros::Imu(1);
+         *    lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *    if (imu.isCalibrating()) {
          *        std::cout << "IMU is calibrating" << std::endl;
@@ -133,7 +133,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *    atomic::V5InertialSensor imu = pros::Imu(1);
+         *    lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *    if (imu.isConnected()) {
          *        std::cout << "IMU is connected" << std::endl;
@@ -161,7 +161,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5InertialSensor imu = pros::Imu(1);
+         *     lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *     // wait for the IMU to calibrate
          *     imu.calibrate();
@@ -193,7 +193,7 @@ class V5InertialSensor : public IMU {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::V5InertialSensor imu = pros::Imu(1);
+         *     lemlib::V5InertialSensor imu = pros::Imu(1);
          *
          *     // wait for the IMU to calibrate
          *     imu.calibrate();
@@ -211,4 +211,3 @@ class V5InertialSensor : public IMU {
         Angle m_offset = 0_stRot;
         mutable pros::Imu m_imu;
 };
-} // namespace atomic

@@ -7,11 +7,11 @@
 #include "pros/rtos.hpp"
 #include <vector>
 
-namespace atomic {
+
 /**
  * @brief MotorGroup class
  *
- * This class is a handler for a group of atomic::Motor objects, which themselves are wrappers for ther pros::Motor
+ * This class is a handler for a group of lemlib::Motor objects, which themselves are wrappers for ther pros::Motor
  * objects. This class allows for easy control of collection of telemetry, as inputs and outputs are unitized. This
  * class also enables users to add and remove motors from the group, which is useful when a motor can be moved between
  * subsystems using a Power Take Off (PTO) or similar mechanism.
@@ -34,7 +34,7 @@ class MotorGroup : public Encoder {
          * void initialize() {
          *     // motor group with motors on ports 1, -2, and 3
          *     // max theoretical output is 360 rpm
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          * }
          * @endcode
          */
@@ -61,7 +61,7 @@ class MotorGroup : public Encoder {
          *     pros::MotorGroup prosMotorGroup({1, -2, 3});
          *     // motor group that uses the same motors as the pros motor group
          *     // and spins at 600 rpm
-         *     atomic::MotorGroup motorGroup(prosMotorGroup, 600_rpm);
+         *     lemlib::MotorGroup motorGroup(prosMotorGroup, 600_rpm);
          * }
          * @endcode
          */
@@ -80,7 +80,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // move the motors forward at 50% power
          *     motorGroup.move(0.5);
@@ -106,7 +106,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // move the motors forward at 50 degrees per second
          *     motorGroup.moveVelocity(50_degps);
@@ -133,7 +133,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // move the motors forward at 50% power
          *     motorGroup.move(0.5);
@@ -152,14 +152,14 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // set the motors to brake when stopped
-         *     motorGroup.setBrakeMode(atomic::BrakeMode::BRAKE);
+         *     motorGroup.setBrakeMode(lemlib::BrakeMode::BRAKE);
          *     // set the motors to coast when stopped
-         *     motorGroup.setBrakeMode(atomic::BrakeMode::COAST);
+         *     motorGroup.setBrakeMode(lemlib::BrakeMode::COAST);
          *     // set the motors to hold when stopped
-         *     motorGroup.setBrakeMode(atomic::BrakeMode::HOLD);
+         *     motorGroup.setBrakeMode(lemlib::BrakeMode::HOLD);
          * }
          * @endcode
          */
@@ -172,14 +172,14 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
-         *     const atomic::BrakeMode mode = motorGroup.getBrakeMode();
-         *     if (mode == atomic::BrakeMode::BRAKE) {
+         *     const lemlib::BrakeMode mode = motorGroup.getBrakeMode();
+         *     if (mode == lemlib::BrakeMode::BRAKE) {
          *         std::cout << "Brake mode is set to BRAKE!" << std::endl;
-         *     } else if (mode == atomic::BrakeMode::COAST) {
+         *     } else if (mode == lemlib::BrakeMode::COAST) {
          *         std::cout << "Brake mode is set to COAST!" << std::endl;
-         *     } else if (mode == atomic::BrakeMode::HOLD) {
+         *     } else if (mode == lemlib::BrakeMode::HOLD) {
          *         std::cout << "Brake mode is set to HOLD!" << std::endl;
          *     } else {
          *         std::cout << "Error getting brake mode!" << std::endl;
@@ -197,7 +197,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     const int result = motorGroup.isConnected();
          *     if (result == 1) {
@@ -227,7 +227,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     const Angle angle = motorGroup.getAngle();
          *     if (angle == INFINITY) {
@@ -256,7 +256,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     if (motorGroup.setAngle(0_stDeg) == 0) {
          *         std::cout << "Relative angle set!" << std::endl;
@@ -283,7 +283,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // output the current limit to the console
          *     Current limit = motorGroup.getCurrentLimit();
@@ -310,7 +310,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *     // set the current limit to 6 amp
          *     // every motor in the group will have a current limit of 2 amp
          *     // making for a total current limit of 6 amp
@@ -332,11 +332,11 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // output motor temperatures to the console
          *     std::vector<Temperature> temperatures = motorGroup.getTemperatures();
-         *     for (atomic::Motor motor : motorGroup) {
+         *     for (lemlib::Motor motor : motorGroup) {
          *         if (units::to_celsius(temperature) == INFINITY) {
          *             std::cout << "Error getting motor temperature" << std::endl;
          *         } else {
@@ -357,7 +357,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *     // set the output velocity to 450 rpm
          *     motorGroup.setOutputVelocity(450_rpm);
          * }
@@ -372,7 +372,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *     std::cout << "output velocity: " << motorGroup.getOutputVelocity() << std::endl; // outputs 360 rpm
          * }
          * @endcode
@@ -386,7 +386,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     std::cout << "Number of connected motors: " << motorGroup.getSize() << std::endl;
          * }
@@ -414,7 +414,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // add a motor to the group
          *     motorGroup.addMotor(4);
@@ -438,7 +438,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // add a motor to the group
          *     pros::Motor motor4(4, pros::v5::MotorGears::green);
@@ -464,7 +464,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *    // add a motor to the group, which should be reversed
          *     pros::Motor motor4(4, pros::v5::MotorGears::green);
@@ -481,7 +481,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // remove a motor from the group
          *     motorGroup.removeMotor(4);
@@ -497,7 +497,7 @@ class MotorGroup : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
+         *     lemlib::MotorGroup motorGroup({1, -2, 3}, 360_rpm);
          *
          *     // remove a motor from the group
          *     pros::Motor motor4(4, pros::v5::MotorGears::green);
@@ -532,11 +532,11 @@ class MotorGroup : public Encoder {
          */
         Angle configureMotor(ReversibleSmartPort port) const;
         /**
-         * @brief Get motors in the motor group as a vector of atomic::Motor objects
+         * @brief Get motors in the motor group as a vector of lemlib::Motor objects
          *
          * This function exists to simplify logic in the MotorGroup source code.
          *
-         * @return const std::vector<Motor> vector of atomic::Motor objects
+         * @return const std::vector<Motor> vector of lemlib::Motor objects
          */
         const std::vector<Motor> getMotors() const;
         /**
@@ -554,7 +554,7 @@ class MotorGroup : public Encoder {
         /**
          * This member variable is a vector of motor information
          *
-         * Ideally, we'd use a vector of atomic::Motor objects, but this does not work if you want to remove an element
+         * Ideally, we'd use a vector of lemlib::Motor objects, but this does not work if you want to remove an element
          * from the vector as the copy constructor is implicitly deleted.
          *
          * The ports are signed to indicate whether a motor should be reversed or not.
@@ -567,4 +567,4 @@ class MotorGroup : public Encoder {
          */
         mutable std::vector<MotorInfo> m_motors;
 };
-}; // namespace atomic
+

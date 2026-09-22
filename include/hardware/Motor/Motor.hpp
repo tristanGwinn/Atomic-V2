@@ -6,7 +6,7 @@
 #include "pros/rtos.hpp"
 #include "pros/motors.hpp"
 
-namespace atomic {
+
 
 enum class BrakeMode { COAST, BRAKE, HOLD, INVALID };
 
@@ -23,7 +23,7 @@ class Motor : public Encoder {
          * @code {.cpp}
          * void initialize() {
          *     // construct a new Motor object on port 1, which is reversed, and powers a mechanism that spins at 15 rpm
-         *     atomic::Motor motor(-1, 15_rpm);
+         *     lemlib::Motor motor(-1, 15_rpm);
          * }
          * @endcode
          */
@@ -49,7 +49,7 @@ class Motor : public Encoder {
          *     // create a pros motor on port 1, which is reversed
          *     pros::Motor prosMotor(-1);
          *     // create a motor which is reversed, on port 1, and spins at 200 rpm
-         *     atomic::Motor motor = atomic::Motor::from_pros_motor(prosMotor, 200_rpm);
+         *     lemlib::Motor motor = lemlib::Motor::from_pros_motor(prosMotor, 200_rpm);
          * }
          * @endcode
          */
@@ -68,7 +68,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // move the motor forward at 50% power
          *     motor.move(0.5);
          *     // move the motor backward at 50% power
@@ -93,7 +93,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // move the motor forward at 50 degrees per second
          *     motor.moveVelocity(50_degps);
          *     // move the motor backward at 50 degrees per second
@@ -119,7 +119,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // move the motor forward at 50% power
          *     motor.move(0.5);
          *     // brake the motor
@@ -143,13 +143,13 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // set the motor to brake when stopped
-         *     motor.setBrakeMode(atomic::BrakeMode::BRAKE);
+         *     motor.setBrakeMode(lemlib::BrakeMode::BRAKE);
          *     // set the motor to coast when stopped
-         *     motor.setBrakeMode(atomic::BrakeMode::COAST);
+         *     motor.setBrakeMode(lemlib::BrakeMode::COAST);
          *     // set the motor to hold when stopped
-         *     motor.setBrakeMode(atomic::BrakeMode::HOLD);
+         *     motor.setBrakeMode(lemlib::BrakeMode::HOLD);
          * }
          * @endcode
          */
@@ -167,13 +167,13 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
-         *     const atomic::BrakeMode mode = motor.getBrakeMode();
-         *     if (mode == atomic::BrakeMode::BRAKE) {
+         *     lemlib::Motor motor(1, 200_rpm);
+         *     const lemlib::BrakeMode mode = motor.getBrakeMode();
+         *     if (mode == lemlib::BrakeMode::BRAKE) {
          *         std::cout << "Brake mode is set to BRAKE!" << std::endl;
-         *     } else if (mode == atomic::BrakeMode::COAST) {
+         *     } else if (mode == lemlib::BrakeMode::COAST) {
          *         std::cout << "Brake mode is set to COAST!" << std::endl;
-         *     } else if (mode == atomic::BrakeMode::HOLD) {
+         *     } else if (mode == lemlib::BrakeMode::HOLD) {
          *         std::cout << "Brake mode is set to HOLD!" << std::endl;
          *     } else {
          *         std::cout << "Error getting brake mode!" << std::endl;
@@ -191,7 +191,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     const int result = motor.isConnected();
          *     if (result == 1) {
          *         std::cout << "motor is connected!" << std::endl;
@@ -220,7 +220,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     const Angle angle = motor.getAngle();
          *     if (angle == INFINITY) {
          *         std::cout << "Error getting relative angle!" << std::endl;
@@ -235,7 +235,7 @@ class Motor : public Encoder {
          * @brief Set the relative angle of the motor
          *
          * Setting the relative angle of the motor does so only on a software level, meaning that any other
-         * atomic::Motor objects will not register a change in the angle, only this object will
+         * lemlib::Motor objects will not register a change in the angle, only this object will
          *
          * This function uses the following values of errno when an error state is reached:
          *
@@ -251,7 +251,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     if (motor.setAngle(0_stDeg) == 0) {
          *         std::cout << "Relative angle set!" << std::endl;
          *         std::cout < "Relative angle: " << to_sDeg(motor.getAngle()) << std::endl; // outputs 0
@@ -271,7 +271,7 @@ class Motor : public Encoder {
          *
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *
          *     // expected output: 0 degrees
          *     std::cout << "offset: " << to_stDeg(motor.getOffset()) << std::endl;
@@ -300,7 +300,7 @@ class Motor : public Encoder {
          * @b Example
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *
          *     // expected output: 0 degrees
          *     std::cout << "angle: " << to_stDeg(motor.getAngle()) << std::endl;
@@ -328,13 +328,13 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     switch (motor.getType()) {
-         *        case (atomic::MotorType::V5): {
+         *        case (lemlib::MotorType::V5): {
          *            std::cout << "V5 Motor on port 1" << std::endl;
          *            break;
          *        }
-         *        case (atomic::MotorType::EXP): {
+         *        case (lemlib::MotorType::EXP): {
          *            std::cout << "EXP Motor on port 1" << std::endl;
          *            break;
          *        }
@@ -353,7 +353,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     if (motor.isReversed() == 1) {
          *         std::cout << "Motor is reversed!" << std::endl;
          *     } else if (motor.isReversed() == 0) {
@@ -374,7 +374,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // reverse the motor
          *     motor.setReversed(true);
          * }
@@ -391,7 +391,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     std::cout << "Motor is connected to port " << motor.getPort() << std::endl;
          * }
          * @endcode
@@ -412,7 +412,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *
          *     // output the current limit to the console
          *     Current limit = motor.getCurrentLimit();
@@ -439,7 +439,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *     // set the current limit to 0.5 amp
          *     motor.setCurrentLimit(0.5_amp);
          * }
@@ -459,7 +459,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 200_rpm);
+         *     lemlib::Motor motor(1, 200_rpm);
          *
          *     // output motor temperature to the console
          *     Temperature temperature = motor.getTemperature();
@@ -482,7 +482,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 360_rpm);
+         *     lemlib::Motor motor(1, 360_rpm);
          *     // set the output velocity to 450 rpm
          *     motor.setOutputVelocity(450_rpm);
          * }
@@ -497,7 +497,7 @@ class Motor : public Encoder {
          * @b Example:
          * @code {.cpp}
          * void initialize() {
-         *     atomic::Motor motor(1, 360_rpm);
+         *     lemlib::Motor motor(1, 360_rpm);
          *     // get the motor output
          *     std::cout << motor.getOutputVelocity() << std::endl; // output: 360_rpm
          * }
@@ -510,4 +510,3 @@ class Motor : public Encoder {
         Angle m_offset = 0_stDeg;
         ReversibleSmartPort m_port;
 };
-} // namespace atomic

@@ -3,7 +3,7 @@
 #include "hardware/Device.hpp"
 #include "units/Angle.hpp"
 
-namespace atomic {
+
 /**
  * @brief abstract class for encoders
  *
@@ -61,4 +61,3 @@ class Encoder : public Device {
         virtual int32_t setAngle(Angle angle) = 0;
         virtual ~Encoder() = default;
 };
-} // namespace atomic

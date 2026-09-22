@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <algorithm>
 
-namespace atomic {
+
 
 namespace detail {
 
@@ -135,4 +135,4 @@ class ADIPair {
         ADIPort m_port_2;
 };
 
-} // namespace atomic
+

@@ -2,7 +2,7 @@
 
 #include <climits>
 
-namespace atomic {
+
 /**
  * @brief Convert a PROS function return to a standard return
  *
@@ -26,4 +26,3 @@ inline int convertStatus(int status) {
     if (status == 1) return 0;
     else return INT_MAX;
 }
-} // namespace atomic
