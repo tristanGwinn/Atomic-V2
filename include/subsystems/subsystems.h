@@ -14,21 +14,22 @@
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
 MotorGroup left_motors({-10, -9}, 450_rpm);
-MotorGroup right_motors({3, 2}, 450_rpm);
-pros::Imu imu(2);
+MotorGroup right_motors({3, 1}, 450_rpm);
+pros::Imu imu(20);
+// V5InertialSensor imu(20);
 
 
 TrackingWheel horizontal_tracker(
-                                ReversibleSmartPort(18),    // tracking port
+                                ReversibleSmartPort(13),    // tracking port
                                 2.0_in,                             // diameter
                                 -3.0_in                             // offset
                             );
 
 
-MotorGroup lift_motors({-13, 7}, 600_rpm);  // lift motors
+MotorGroup lift_motors({11, -21}, 600_rpm);  // lift motors
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
-pros::Imu arm_imu(10);
+pros::Imu arm_imu(8);
 PID arm_pid(0.0, 0.0, 0.0, 0.0, false);
 
 // Subsystem Objects
@@ -57,9 +58,11 @@ ArmSubsystem *arm;
 }
 
 void initializeSubsystems(){
+    // imu.tare();
+
     lift = new LiftSubsystem(lift_motors);
-    drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
     arm = new ArmSubsystem(arm_motors, arm_imu, arm_pid);
+    drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
     
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));

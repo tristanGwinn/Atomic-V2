@@ -10,7 +10,7 @@
 
 class TrackingWheel {
     private:
-        Encoder* m_encoder;
+        V5RotationSensor* m_encoder;
         Length m_diameter;
         Length m_offset;
         Number m_ratio;
@@ -71,6 +71,8 @@ class TrackingWheel {
          */
         Length getDistanceTraveled() { return to_stRot(m_encoder->getAngle()) * M_PI * m_diameter * m_ratio; }
 
+        Angle getTrackerAngle() { return m_encoder->getAngle(); }
+        
         /**
          * @brief Get the offset of the tracking wheel from the center of rotation
          *

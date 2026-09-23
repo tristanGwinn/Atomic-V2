@@ -12,8 +12,8 @@ class DriveSubsystem : public Subsystem {
         MotorGroup right_motors;
 
         TrackingWheel horizontal_tracker;
-        std::optional<V5InertialSensor> imu;    // not sure if this should be an optional, but it works so wtv
         pros::Imu imu_pros;
+        V5InertialSensor imu;
 
         float deadband = 0;     // no deadband by default
         float minOutput = 0;    // no min output by default
@@ -35,29 +35,53 @@ class DriveSubsystem : public Subsystem {
                                 pros::Imu inertial, TrackingWheel &tracker,
                                 float deadband, float minOutput, float curve)
         : left_motors(leftmotors), right_motors(rightmotors),
-          imu_pros(inertial), horizontal_tracker(tracker),
+          imu_pros(inertial), imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
             tareEncoders(); 
-            imu->from_pros_imu(inertial);
+
+            // imu.calibrate();
         }
 
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu inertial, TrackingWheel &tracker)
         : left_motors(leftmotors), right_motors(rightmotors),
-          imu_pros(inertial), horizontal_tracker(tracker)
+          imu_pros(inertial),  imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
             tareEncoders();
-            imu->from_pros_imu(inertial);
+
+            // imu.calibrate();
         }
 
         void periodic() override {
-            updateOdom();
+            // updateOdom();
+
+            // pros::lcd::print(0, "left drive pos: %f", (to_stRad(left_motors.getAngle()) * config::wheel_diameter).internal());
+            // pros::lcd::print(1, "horizontal tracker: %d", horizontal_tracker.getTrackerAngle().internal());
+            // pros::lcd::print(2, "PROS IMU heading: %f", imu_pros.get_heading());
+            // pros::lcd::print(3, "IMU Wrapper Rotation: %f", imu.getRotation().internal());
             
-            pros::lcd::print(0, "POSE");
-            pros::lcd::print(1, "x (sideways): %f", pose.x);
-            pros::lcd::print(2, "y (horizontal): %f", pose.y);
-            pros::lcd::print(3, "theta: %f", pose.orientation);
+
+            printf("PROS IMU heading: %f deg\n", imu_pros.get_heading());
+            printf("Wrapper Rotation: %f rad\n", imu.getRotation().internal());
+            printf("Horizontal Tracker: %f rad\n", horizontal_tracker.getTrackerAngle().internal());
+            printf("Left Drivetrain Tracker: %f in\n", to_in(to_stRad(left_motors.getAngle()) * config::wheel_diameter));
+            // printf("Horizontal Tracker (Deg): %d\n", horizontal_tracker.getRotations() * 180.0 / M_PI);
+            // printf("Horizontal Tracker (Rotations): %d\n", horizontal_tracker.getRotations() / M_TWOPI);
+
+            // printf("Wrapper is valid: %d\n", imu.isConnected());  // If this method exists
+
+            
+            // printf("POSE \n");
+            printf("x (sideways): %f \n", pose.x.internal());
+            printf("y (horizontal): %f \n", pose.y.internal());
+            printf("theta: %f \n", pose.orientation.internal());
+            
+
+            // pros::lcd::print(0, "POSE");
+            // pros::lcd::print(1, "x (sideways): %d", pose.x.internal());
+            // pros::lcd::print(2, "y (horizontal): %d", pose.y.internal());
+            // pros::lcd::print(3, "theta: %d", to_stDeg(pose.orientation));
         }
 
         void updateOdom() {
@@ -71,9 +95,11 @@ class DriveSubsystem : public Subsystem {
             
             // get heading (from imu, if imu is messed up, get the heading from wheels)
             const Angle theta = theta_offset + 
-                          ((imu->getRotation().internal() == INFINITY)
+                          ((imu.getRotation().internal() == INFINITY)
                           ? from_stDeg((left_delta + left_previous - right_delta - right_previous) / (config::track_width)) + 90_stDeg
-                          : imu->getRotation());
+                          : imu.getRotation());
+
+            // const Angle theta = imu.getRotation();
 
             const Angle deltaTheta = theta - pose.orientation;
 
