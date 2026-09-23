@@ -117,7 +117,8 @@ class DriveSubsystem : public Subsystem {
             // add rotated local change vector to global position vector
             pose.x += magnitude * cos(rotated_theta);
             pose.y += magnitude * sin(rotated_theta);
-            pose.orientation = theta;
+
+            pose.orientation = theta;   // set pose orientation to measured robot angle
         }
 
         void updateLeftDelta() {
