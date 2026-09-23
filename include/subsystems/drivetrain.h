@@ -21,6 +21,8 @@ class DriveSubsystem : public Subsystem {
 
         std::optional<double> pct;
 
+        bool track_odom = false;
+
         Length left_previous = 0_m;
         Length right_previous = 0_m;
 
@@ -38,9 +40,7 @@ class DriveSubsystem : public Subsystem {
           imu_pros(inertial), imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
-            tareEncoders(); 
-
-            // imu.calibrate();
+            calibrateTracking();
         }
 
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
@@ -48,24 +48,15 @@ class DriveSubsystem : public Subsystem {
         : left_motors(leftmotors), right_motors(rightmotors),
           imu_pros(inertial),  imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
-            tareEncoders();
-
-            // imu.calibrate();
+            calibrateTracking();
         }
 
         void periodic() override {
-            // updateOdom();
+            if(track_odom) {
+                updateOdom();
+                sendOdomDebug();
+            }
 
-            // pros::lcd::print(0, "left drive pos: %f", (to_stRad(left_motors.getAngle()) * config::wheel_diameter).internal());
-            // pros::lcd::print(1, "horizontal tracker: %d", horizontal_tracker.getTrackerAngle().internal());
-            // pros::lcd::print(2, "PROS IMU heading: %f", imu_pros.get_heading());
-            // pros::lcd::print(3, "IMU Wrapper Rotation: %f", imu.getRotation().internal());
-            
-
-            printf("PROS IMU heading: %f deg\n", imu_pros.get_heading());
-            printf("Wrapper Rotation: %f rad\n", imu.getRotation().internal());
-            printf("Horizontal Tracker: %f rad\n", horizontal_tracker.getTrackerAngle().internal());
-            printf("Left Drivetrain Tracker: %f in\n", to_in(to_stRad(left_motors.getAngle()) * config::wheel_diameter));
             // printf("Horizontal Tracker (Deg): %d\n", horizontal_tracker.getRotations() * 180.0 / M_PI);
             // printf("Horizontal Tracker (Rotations): %d\n", horizontal_tracker.getRotations() / M_TWOPI);
 
@@ -73,15 +64,17 @@ class DriveSubsystem : public Subsystem {
 
             
             // printf("POSE \n");
+        }
+
+        // for debugging purposes ... will likely remove later
+        void sendOdomDebug(){
+            printf("PROS IMU heading: %f deg\n", imu_pros.get_heading());
+            printf("Wrapper Rotation: %f rad\n", imu.getRotation().internal());
+            printf("Horizontal Tracker: %f rad\n", horizontal_tracker.getTrackerAngle().internal());
+            printf("Left Drivetrain Tracker: %f in\n", to_in(to_stRad(left_motors.getAngle()) * config::wheel_diameter));
             printf("x (sideways): %f \n", pose.x.internal());
             printf("y (horizontal): %f \n", pose.y.internal());
             printf("theta: %f \n", pose.orientation.internal());
-            
-
-            // pros::lcd::print(0, "POSE");
-            // pros::lcd::print(1, "x (sideways): %d", pose.x.internal());
-            // pros::lcd::print(2, "y (horizontal): %d", pose.y.internal());
-            // pros::lcd::print(3, "theta: %d", to_stDeg(pose.orientation));
         }
 
         void updateOdom() {
@@ -99,8 +92,6 @@ class DriveSubsystem : public Subsystem {
                           ? from_stDeg((left_delta + left_previous - right_delta - right_previous) / (config::track_width)) + 90_stDeg
                           : imu.getRotation());
 
-            // const Angle theta = imu.getRotation();
-
             const Angle deltaTheta = theta - pose.orientation;
 
             // calculate local change vector
@@ -112,7 +103,20 @@ class DriveSubsystem : public Subsystem {
             }();
 
             // set global position, V2Position makes this super easy
-            pose += localChange.rotatedBy(pose.orientation + deltaTheta / 2);    // rotate by avg theta
+            // pose += localChange.rotatedBy(pose.orientation + deltaTheta / 2);    // rotate by avg theta
+
+
+            // Instead of the rotateBy() function of V2Position, this is done manually here for debugging purposes.
+
+            // get the magnitude of the local change vector
+            const Length magnitude = sqrt(localChange.x*localChange.x + localChange.y*localChange.y);
+
+            // angle of the local change vector plus the angle of rotation (global frame average)
+            const Angle rotated_theta = atan2(localChange.y, localChange.x) + (pose.orientation + deltaTheta / 2);
+
+            // add rotated local change vector to global position vector
+            pose.x += magnitude * cos(rotated_theta);
+            pose.y += magnitude * sin(rotated_theta);
             pose.orientation = theta;
         }
 
@@ -128,7 +132,16 @@ class DriveSubsystem : public Subsystem {
             right_previous = pos;
         }
 
-        void tareEncoders() {
+
+        void calibrateTracking(){
+            track_odom = false;
+            resetEncoders();
+            calibrateIMU();
+            pose = {0_m, 0_m, 0_stDeg};
+            track_odom = true;
+        }
+
+        void resetEncoders() {
             left_motors.setAngle(0_stDeg);
             right_motors.setAngle(0_stDeg);
             horizontal_tracker.reset();
@@ -136,9 +149,11 @@ class DriveSubsystem : public Subsystem {
             right_previous= 0_m;
         }
 
-        void tareIMU() {
-            imu_pros.tare();
+        void calibrateIMU() {
+            imu.calibrate();
+            WAIT_UNTIL(imu.isCalibrated());
         }
+
 
         /**
          * based on the expo curve from lemlib.

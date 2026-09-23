@@ -71,6 +71,7 @@ class TrackingWheel {
          */
         Length getDistanceTraveled() { return to_stRot(m_encoder->getAngle()) * M_PI * m_diameter * m_ratio; }
 
+        // this is for debugging
         Angle getTrackerAngle() { return m_encoder->getAngle(); }
         
         /**
