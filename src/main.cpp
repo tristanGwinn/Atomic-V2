@@ -3,20 +3,12 @@
  * 45434A VEX Atomic Codebase
  * Created by Tristan Gwinn and other members of 45434A Atomic for the 2026-2027 VEX Override Season.
  * 
- * Date Updated: 9/22/26
+ * Date Updated: 9/23/26
  * Updated By: Tristan Gwinn
  * 
- * Completed:
- *  - Rewrote odom math to work inside of the drivetrain periodic
- *  - Rewrote drive curve functionality to be inside of drivetrain.h
- *  - modified pid.hpp and removed pid.cpp
- *  - Move robot config variables out of main.cpp
- *  - Got rid of trackingWheel.cpp
- *  - Create dedicated file for Command and subsystem initalization
- * 
- *  - Removed namespace "atomic" and "include/atomic/"
- *  - moved lose files to "deprecate/" in both "src/" and "include/"
- *  - created arm subsystem
+ * What's New:
+ *  - Fixed odometry Pose tracking!!
+ *  - Added temporary arm (chain bar) control
  * 
  * Main to-do: 
  *  - Add functionality to read json files as trajectories (High Priority)
@@ -25,12 +17,6 @@
  * 	- Driver control recording/playback (Low Priority)
  * 
  */
-
-/////
-//
-//  To download code on linux, run sudo chmod a+rw after connecting brain / controller
-//
-/////
 
 #include "main.h"
 #include "pros/imu.hpp"
@@ -53,7 +39,7 @@ void initialize() {
     // Start the command scheduler task
     pros::Task commandSchedulerTask(update_loop);
 
-    // setup and register subsystems and triggers
+    // setup and register subsystems and setup triggers
     initializeSubsystems();
 }
 
