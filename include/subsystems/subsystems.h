@@ -26,7 +26,7 @@ TrackingWheel horizontal_tracker(
                             );
 
 
-MotorGroup lift_motors({11, -21}, 600_rpm);  // lift motors
+MotorGroup lift_motors({-11, 21}, 600_rpm);  // lift motors
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
@@ -65,9 +65,15 @@ void initializeSubsystems(){
     drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
     
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
-    CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));
+    CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));   // also temporary
+    CommandScheduler::registerSubsystem(arm, arm->pctCommand(0.0));     // super temporary
+
     
     // Move lift up on R1 and down on L1
-    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(1.0));
-    primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-1.0));
+    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
+    primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-0.6));
+
+    // Move chain-bar arm forward on R2 and down on L2
+    primary.getTrigger(DIGITAL_R2)->whileTrue(arm->pctCommand(1.0));
+    primary.getTrigger(DIGITAL_L2)->whileTrue(arm->pctCommand(-1.0));
 }

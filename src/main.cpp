@@ -55,7 +55,6 @@ void initialize() {
 
     // setup and register subsystems and triggers
     initializeSubsystems();
-
 }
 
 void disabled() {}

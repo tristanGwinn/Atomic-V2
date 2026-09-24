@@ -21,17 +21,13 @@ class DriveSubsystem : public Subsystem {
 
         std::optional<double> pct;
 
-        bool track_odom = false;
-
         Length left_previous = 0_m;
         Length right_previous = 0_m;
 
-        Length left_delta = 0_m;
-        Length right_delta = 0_m;
+        Angle theta_offset = -90_stDeg;
 
-        Angle theta_offset = 0_stDeg;
+        bool track_odom = false;
         Pose pose = {0_m, 0_m, 0_stDeg};
-
     public:
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu inertial, TrackingWheel &tracker,
@@ -54,27 +50,25 @@ class DriveSubsystem : public Subsystem {
         void periodic() override {
             if(track_odom) {
                 updateOdom();
-                sendOdomDebug();
+                sendOdomDebug();    // print odom data to pros brain terminal
+
+                /*
+                // help!! idk where to put this, it doesn't like to work ... rip
+                pros::lcd::print(0, "ODOM POSE");
+                pros::lcd::print(1, "x (sideways): %f \n", to_in(pose.x));
+                pros::lcd::print(2, "y (forward): %f \n", to_in(pose.y));
+                pros::lcd::print(3, "theta: %f \n", to_stDeg(pose.orientation));
+                */
             }
-
-            // printf("Horizontal Tracker (Deg): %d\n", horizontal_tracker.getRotations() * 180.0 / M_PI);
-            // printf("Horizontal Tracker (Rotations): %d\n", horizontal_tracker.getRotations() / M_TWOPI);
-
-            // printf("Wrapper is valid: %d\n", imu.isConnected());  // If this method exists
-
-            
-            // printf("POSE \n");
         }
 
         // for debugging purposes ... will likely remove later
         void sendOdomDebug(){
-            printf("PROS IMU heading: %f deg\n", imu_pros.get_heading());
-            printf("Wrapper Rotation: %f rad\n", imu.getRotation().internal());
-            printf("Horizontal Tracker: %f rad\n", horizontal_tracker.getTrackerAngle().internal());
-            printf("Left Drivetrain Tracker: %f in\n", to_in(to_stRad(left_motors.getAngle()) * config::wheel_diameter));
-            printf("x (sideways): %f \n", pose.x.internal());
-            printf("y (horizontal): %f \n", pose.y.internal());
-            printf("theta: %f \n", pose.orientation.internal());
+            printf("Sideways Tracker: %f in\n", to_in(horizontal_tracker.getDistanceTraveled()));
+            printf("Drivetrain Position: %f in\n", to_in(left_previous + right_previous) / 2);
+            printf("x (sideways): %f \n", to_in(pose.x));
+            printf("y (forward): %f \n", to_in(pose.y));
+            printf("theta: %f \n", to_stDeg(pose.orientation));
         }
 
         void updateOdom() {
@@ -82,7 +76,9 @@ class DriveSubsystem : public Subsystem {
             const Length sideways_delta = horizontal_tracker.getDistanceDelta();
             const Length sideways_offset = horizontal_tracker.getOffset();
 
-            updateLeftDelta(); updateRightDelta();
+            const auto left_delta = getLeftDelta();
+            const auto right_delta = getRightDelta();
+
             // get forward drivetrain delta (avg of both sides)
             const Length forward_delta = (left_delta + right_delta) / 2;
             
@@ -98,39 +94,37 @@ class DriveSubsystem : public Subsystem {
             const V2Position localChange = [&] {
                 if(deltaTheta == 0_stRad) return V2Position(forward_delta, sideways_delta);
                 const double twosinehalftheta = 2 * sin(deltaTheta / 2);
-                return V2Position(twosinehalftheta * (sideways_delta / to_stRad(deltaTheta)) + sideways_offset,
+                return V2Position(twosinehalftheta * (sideways_delta / to_stRad(deltaTheta) + sideways_offset),
                                   twosinehalftheta * (forward_delta / to_stRad(deltaTheta)));
             }();
 
             // set global position, V2Position makes this super easy
-            // pose += localChange.rotatedBy(pose.orientation + deltaTheta / 2);    // rotate by avg theta
-
+            // pose += localChange.rotatedBy((pose.orientation + deltaTheta) / 2);    // rotate by avg theta
 
             // Instead of the rotateBy() function of V2Position, this is done manually here for debugging purposes.
-
             // get the magnitude of the local change vector
             const Length magnitude = sqrt(localChange.x*localChange.x + localChange.y*localChange.y);
-
             // angle of the local change vector plus the angle of rotation (global frame average)
-            const Angle rotated_theta = atan2(localChange.y, localChange.x) + (pose.orientation + deltaTheta / 2);
-
+            const Angle rotate_theta = atan2(localChange.y, localChange.x) + (pose.orientation + deltaTheta) / 2;
             // add rotated local change vector to global position vector
-            pose.x += magnitude * cos(rotated_theta);
-            pose.y += magnitude * sin(rotated_theta);
+            pose.x += magnitude * cos(rotate_theta);
+            pose.y += magnitude * sin(rotate_theta);
 
             pose.orientation = theta;   // set pose orientation to measured robot angle
         }
 
-        void updateLeftDelta() {
+        Length getLeftDelta() {
             const auto pos = to_stRad(left_motors.getAngle()) * config::wheel_diameter;
-            left_delta = pos - left_previous;
+            const auto delta = pos - left_previous;
             left_previous = pos;
+            return delta;
         }
 
-        void updateRightDelta() {
+        Length getRightDelta() {
             const auto pos = to_stRad(right_motors.getAngle()) * config::wheel_diameter;
-            right_delta = pos - right_previous;
+            const auto delta = pos - right_previous;
             right_previous = pos;
+            return delta;
         }
 
 
@@ -147,10 +141,11 @@ class DriveSubsystem : public Subsystem {
             right_motors.setAngle(0_stDeg);
             horizontal_tracker.reset();
             left_previous = 0_m;
-            right_previous= 0_m;
+            right_previous = 0_m;
         }
 
         void calibrateIMU() {
+            theta_offset = -M_PI_2 * rad;
             imu.calibrate();
             WAIT_UNTIL(imu.isCalibrated());
         }
@@ -185,9 +180,6 @@ class DriveSubsystem : public Subsystem {
         void setPct(const double pct_left, const double pct_right) {
             this->left_motors.move(pct_left);
             this->right_motors.move(pct_right);
-            pros::lcd::print(5, "DRIVETRAIN VOLTAGES (%)");
-            pros::lcd::print(6, "left: %f", pct_left);
-            pros::lcd::print(7, "right: %f", pct_right);
         }
 
         RunCommand* pctCommand(const double left, const double right) {

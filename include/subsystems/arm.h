@@ -13,6 +13,8 @@ class ArmSubsystem : public Subsystem {
         MotorGroup motor;
         pros::Imu imu;
 
+        std::optional<double> pct;
+
         PID pid;
 
         std::optional<double> voltage;
@@ -32,6 +34,13 @@ class ArmSubsystem : public Subsystem {
                 const auto command = pid.update(position.convert(rad));
                 motor.move(command);
             }
+        }
+
+        /**
+         * Move the lift motors at a signed percentage of voltage
+         */
+        void setPct(const double pct) {
+            this->motor.move(pct);
         }
 
         Angle getPosition() const {
@@ -66,6 +75,24 @@ class ArmSubsystem : public Subsystem {
                                      }, []() {
                                      }, [](bool _) {
                                      }, []() { return false; }, {this});
+        }
+
+        /**
+         * this command was take from the annotated example provided in echo's documentation
+         * I left the annotations in for future reference in writing other commnads
+         */
+        RunCommand* pctCommand(const double pct) {
+            // Create a new RunCommand
+            // The lambda body is called at every update, in this case setting the lift percentage
+            return new RunCommand(
+                [this, pct] () // Capture "this" and the percentage request
+                {
+                    this->setPct(pct); // Set the percentage of the lift to the request
+                },
+                {this}  // Add "this", the pointer to this subsystem that is currently running.
+                        // It is important to ensure that all subsystems that are being utilized in a command are properly
+                        // Freed to allow that command to run.
+            );
         }
 
         ~ArmSubsystem() override = default;

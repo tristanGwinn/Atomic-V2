@@ -70,9 +70,6 @@ class TrackingWheel {
          * @return float distance traveled in inches
          */
         Length getDistanceTraveled() { return to_stRot(m_encoder->getAngle()) * M_PI * m_diameter * m_ratio; }
-
-        // this is for debugging
-        Angle getTrackerAngle() { return m_encoder->getAngle(); }
         
         /**
          * @brief Get the offset of the tracking wheel from the center of rotation
