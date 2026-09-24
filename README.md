@@ -5,14 +5,20 @@
 ## Description
 The VEX V5RC PROS codebase and designed for and by team 45434A Atomic for the 2026-2027 Override VEX season.
 
-## Branch Task: 
-Clean up code and directory
+## Current Goal: 
+Have robot operator control code finished and tested.
 
-### Task to-do:
-- Create dedicated file for Command and subsystem initalization 🟢
-- Move robot config variables out of main.cpp 🟡
-- Remove lemlib style motion handling and replace with command based motions 🔵
-- Implement Commands where possible and update/remove files in "deprecate/" 🟢
+### Current to-do: 
+- Write operator control code for the arm / chain bar 🔵
+- Add commands to automate specific lift & arm combined positions 🟢
+- Operator debug / testing menu or debug data collection 🟡
+- Operator debug data visualization 🔴
+- Driver control recording/playback 🔴
+
+### Overall to-do:
+- Rewrite autonomous motions to work inside the command scheduler 🟢
+- Add functionality to read json files as trajectories 🟢
+- Update Atomic logo to new pink version 🔴
 
 #### TODO Color Legend:
 - 🔵 Top Priority
