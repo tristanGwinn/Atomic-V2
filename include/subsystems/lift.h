@@ -5,6 +5,7 @@
 
 #include "hardware/Motor/MotorGroup.hpp"
 
+// This is a subsystem class for the cascade lift
 class LiftSubsystem : public Subsystem {
     private:
         MotorGroup motor;
@@ -19,10 +20,10 @@ class LiftSubsystem : public Subsystem {
         }
 
         /**
-         * This function ca
+         * This function executes every fram of the command scheduler
          */
         void periodic() override {
-            // auto position = this->getPosition();
+            // todo: update and move to position with pid controller, reference arm.h
         }
 
         /**

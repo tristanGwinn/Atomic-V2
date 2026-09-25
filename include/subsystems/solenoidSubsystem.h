@@ -8,6 +8,7 @@
 #include "command/runCommand.h"
 #include "command/subsystem.h"
 
+// May want to make this into an abstract class or smth, idk
 class SolenoidSubsystem : public Subsystem {
     std::vector<pros::adi::DigitalOut> solenoids;
 

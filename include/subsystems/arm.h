@@ -8,6 +8,7 @@
 #include "hardware/Motor/MotorGroup.hpp"
 #include "pros/imu.hpp"
 
+// this is a subsystem class for the chain bar
 class ArmSubsystem : public Subsystem {
     private:
         MotorGroup motor;
