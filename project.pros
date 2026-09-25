@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Atomic-V2",
+    "project_name": "Atomic-V2 (ARM CODE BAD)",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -592,8 +592,9 @@
       }
     },
     "upload_options": {
-      "description": "9-23-2026",
-      "icon": "planet"
+      "description": "9-25-2026",
+      "icon": "alien",
+      "slot": 2
     },
     "use_early_access": false
   }

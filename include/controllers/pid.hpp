@@ -62,7 +62,7 @@ class PID {
         void setTarget(Number target) { m_target = target; }
 
         /**
-         * @brief Updates the PID controller using a given error, and outputs the next control signal.
+         * @brief Updates the PID controller using a given input, and outputs the next control signal.
          *
          * @param input current position
          * @return The control signal (output)

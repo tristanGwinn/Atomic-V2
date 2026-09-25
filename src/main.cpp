@@ -27,7 +27,7 @@
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
-bool logoOnBrain = false;
+bool logoOnBrain = true;
 
 void initialize() {
 	if (logoOnBrain){

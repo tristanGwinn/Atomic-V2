@@ -11,7 +11,15 @@
 class ArmSubsystem : public Subsystem {
     private:
         MotorGroup motor;
+
         pros::Imu imu;
+        pros::Imu chassis_imu;
+
+        double max_init_delta = 0.1;    // this should be somewhere between 0.6 and 1
+        double prev_position = 0;
+
+        std::optional<double> pos_offset;
+        std::optional<double> position;
 
         std::optional<double> pct;
 
@@ -21,18 +29,33 @@ class ArmSubsystem : public Subsystem {
         std::optional<double> target;
 
     public:
-        explicit ArmSubsystem(MotorGroup &motors, pros::Imu &inertial, const PID &pid)
-         : motor(motors), imu(inertial), pid(pid) {
+        explicit ArmSubsystem(MotorGroup &motors, pros::Imu &inertial, pros::Imu &chassis_inertial, const PID &pid)
+         : motor(motors), imu(inertial), chassis_imu(chassis_inertial), pid(pid) {
+            calibrateSensors();
+        }
+
+        void calibrateSensors() {
+            imu.tare();
             motor.setAngle(0_stDeg);
-            imu.reset();
         }
 
         void periodic() override {
-            auto position = this->getPosition();
+            position = this->getPosition() - pos_offset.value_or(0);
             
+            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 17.0)) {
+                pos_offset = position;
+            }
+            prev_position = position.value();
+
+            printf("arm roll: %f \n", imu.get_roll());
+            printf("arm position: %f \n", position);
+            printf("arm position offset: %f \n", pos_offset.value_or(0));
+
             if (!voltage.has_value() && target.has_value()) {
-                const auto command = pid.update(position.convert(rad));
-                motor.move(command);
+                 const auto control_out = pid.update(position.value());
+                 printf("arm error: %f \n", position.value() - target.value());
+                 printf("arm control output: %f \n", control_out);
+                 motor.move(control_out);
             }
         }
 
@@ -43,22 +66,23 @@ class ArmSubsystem : public Subsystem {
             this->motor.move(pct);
         }
 
-        Angle getPosition() const {
-            // to-do: consider the imu rotation of the chassis
+        double getPosition() const {
+            double arm_roll = imu.get_roll();
+            arm_roll -= chassis_imu.get_roll();    // account for the roll of the chassis imu
 
-            // convert the roll into rotation relative to initial rotation (tuned constant)
-            // 35 should be replaced with a tuned constant defined elsewhere
-            auto pos = (imu.get_roll() < 0) ?
-                       180*2 + imu.get_roll() + 35 : imu.get_roll() - 35; 
-            return from_stDeg(pos);    
+            // convert the roll into a rotation value (where 180 is the facing up)
+            auto pos = (arm_roll < 0) ?
+                        fabs(arm_roll) : 360 - arm_roll; 
+            return pos;    
         }
 
-        void setTarget(Angle target) {
-            pid.setTarget(target.convert(rad));
+        void setTarget(double target) {
+            pid.setTarget(target);
+            this->target = target;
             voltage = std::nullopt;
         }
 
-        FunctionalCommand *positionCommand(Angle angle, Angle threshold = 8_stDeg) {
+        FunctionalCommand *positionCommand(double angle, double threshold = 8.0) {
         return new FunctionalCommand(
             [this, angle]() { this->setTarget(angle);
                                      }, [this, angle]() { this->setTarget(angle); }, [](bool _) {
@@ -67,11 +91,11 @@ class ArmSubsystem : public Subsystem {
                                      }, {this});
         }
 
+        // DO NOT USE, DOES NOT WORK, MAKES SCARY AHHHHHH
         FunctionalCommand *holdPositionCommand() {
         return new FunctionalCommand([this]() {
                                          this->setTarget(
-                                             this->getPosition() + 5 *
-                                             1_stDeg);
+                                             this->getPosition() + 0.5);
                                      }, []() {
                                      }, [](bool _) {
                                      }, []() { return false; }, {this});

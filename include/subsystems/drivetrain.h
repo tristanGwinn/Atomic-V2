@@ -12,7 +12,6 @@ class DriveSubsystem : public Subsystem {
         MotorGroup right_motors;
 
         TrackingWheel horizontal_tracker;
-        pros::Imu imu_pros;
         V5InertialSensor imu;
 
         float deadband = 0;     // no deadband by default
@@ -30,19 +29,19 @@ class DriveSubsystem : public Subsystem {
         Pose pose = {0_m, 0_m, 0_stDeg};
     public:
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
-                                pros::Imu inertial, TrackingWheel &tracker,
+                                pros::Imu &inertial, TrackingWheel &tracker,
                                 float deadband, float minOutput, float curve)
         : left_motors(leftmotors), right_motors(rightmotors),
-          imu_pros(inertial), imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
+          imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
             calibrateTracking();
         }
 
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
-                                pros::Imu inertial, TrackingWheel &tracker)
+                                pros::Imu &inertial, TrackingWheel &tracker)
         : left_motors(leftmotors), right_motors(rightmotors),
-          imu_pros(inertial),  imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
+          imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
             calibrateTracking();
         }
@@ -50,7 +49,7 @@ class DriveSubsystem : public Subsystem {
         void periodic() override {
             if(track_odom) {
                 updateOdom();
-                sendOdomDebug();    // print odom data to pros brain terminal
+                // sendOdomDebug();    // print odom data to pros brain terminal
 
                 /*
                 // help!! idk where to put this, it doesn't like to work ... rip
@@ -62,7 +61,7 @@ class DriveSubsystem : public Subsystem {
             }
         }
 
-        // for debugging purposes ... will likely remove later
+        // for debugging purposes
         void sendOdomDebug(){
             printf("Sideways Tracker: %f in\n", to_in(horizontal_tracker.getDistanceTraveled()));
             printf("Drivetrain Position: %f in\n", to_in(left_previous + right_previous) / 2);
