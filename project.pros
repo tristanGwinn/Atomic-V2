@@ -592,8 +592,9 @@
       }
     },
     "upload_options": {
-      "description": "9-23-2026",
-      "icon": "planet"
+      "description": "9-25-2026",
+      "icon": "planet",
+      "slot": 1
     },
     "use_early_access": false
   }
