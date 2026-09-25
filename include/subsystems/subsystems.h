@@ -16,8 +16,6 @@ CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller fo
 MotorGroup left_motors({-10, -9}, 450_rpm);
 MotorGroup right_motors({3, 1}, 450_rpm);
 pros::Imu imu(20);
-// V5InertialSensor imu(20);
-
 
 TrackingWheel horizontal_tracker(
                                 ReversibleSmartPort(13),    // tracking port
@@ -30,7 +28,7 @@ MotorGroup lift_motors({-11, 21}, 600_rpm);  // lift motors
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
-PID arm_pid(0.0, 0.0, 0.0, 0.0, false);
+PID arm_pid(0.5, 0.0, 0.0, 0.0, false);
 
 // Subsystem Objects
 LiftSubsystem *lift;
@@ -58,22 +56,22 @@ ArmSubsystem *arm;
 }
 
 void initializeSubsystems(){
-    // imu.tare();
+    imu.tare();
 
     lift = new LiftSubsystem(lift_motors);
-    arm = new ArmSubsystem(arm_motors, arm_imu, arm_pid);
+    arm = new ArmSubsystem(arm_motors, arm_imu, imu, arm_pid);
     drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
     
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));   // also temporary
-    CommandScheduler::registerSubsystem(arm, arm->pctCommand(0.0));     // super temporary
+    CommandScheduler::registerSubsystem(arm, arm->pctCommand(0.0));
 
     
     // Move lift up on R1 and down on L1
     primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
     primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-0.6));
 
-    // Move chain-bar arm forward on R2 and down on L2
-    primary.getTrigger(DIGITAL_R2)->whileTrue(arm->pctCommand(1.0));
-    primary.getTrigger(DIGITAL_L2)->whileTrue(arm->pctCommand(-1.0));
+
+    primary.getTrigger(DIGITAL_B)->whileTrue(arm->positionCommand(2.0));
+    primary.getTrigger(DIGITAL_L2)->whileTrue(arm->positionCommand(180.0));
 }
