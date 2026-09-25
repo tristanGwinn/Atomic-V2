@@ -12,6 +12,7 @@ class ArmSubsystem : public Subsystem {
     private:
         MotorGroup motor;
 
+        // im not using hadrware wrappers here bcuz they dont return roll or yaw.
         pros::Imu imu;
         pros::Imu chassis_imu;
 
@@ -59,13 +60,6 @@ class ArmSubsystem : public Subsystem {
             }
         }
 
-        /**
-         * Move the lift motors at a signed percentage of voltage
-         */
-        void setPct(const double pct) {
-            this->motor.move(pct);
-        }
-
         double getPosition() const {
             double arm_roll = imu.get_roll();
             arm_roll -= chassis_imu.get_roll();    // account for the roll of the chassis imu
@@ -76,10 +70,28 @@ class ArmSubsystem : public Subsystem {
             return pos;    
         }
 
+        /**
+         * Move the lift motors at a signed percentage of voltage
+         */
+        void setPct(const double pct) {
+            this->motor.move(pct);
+        }
+
         void setTarget(double target) {
             pid.setTarget(target);
             this->target = target;
             voltage = std::nullopt;
+        }
+
+        void brakeMotors(BrakeMode brake_mode) {
+            motor.setBrakeMode(brake_mode);
+            motor.brake();
+        }
+
+        void stopAndHold() {
+            voltage = std::nullopt;
+            target = std::nullopt;
+            brakeMotors(BrakeMode::HOLD);
         }
 
         FunctionalCommand *positionCommand(double angle, double threshold = 8.0) {
@@ -91,11 +103,9 @@ class ArmSubsystem : public Subsystem {
                                      }, {this});
         }
 
-        // DO NOT USE, DOES NOT WORK, MAKES SCARY AHHHHHH
         FunctionalCommand *holdPositionCommand() {
         return new FunctionalCommand([this]() {
-                                         this->setTarget(
-                                             this->getPosition() + 0.5);
+                                         this->stopAndHold();
                                      }, []() {
                                      }, [](bool _) {
                                      }, []() { return false; }, {this});
