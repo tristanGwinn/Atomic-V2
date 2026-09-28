@@ -9,21 +9,29 @@
 class LiftSubsystem : public Subsystem {
     private:
         MotorGroup motor;
+        double winch_diameter;
 
+        double position = 0;
         std::optional<double> pct;
 
         // other components here
 
     public:
-        explicit LiftSubsystem(MotorGroup &motors) : motor(motors) {
-            motor.setAngle(0_stDeg);    // tare output upon initialization
+        explicit LiftSubsystem(MotorGroup &motors, double diameter) : motor(motors), winch_diameter(diameter) {
+            motor.setAngle(0_stDeg);    // tare encoder upon initialization
         }
 
         /**
          * This function executes every fram of the command scheduler
          */
         void periodic() override {
+            position = getPosition();
+
             // todo: update and move to position with pid controller, reference arm.h
+        }
+
+        double getPosition() {
+            return to_stRot(motor.getAngle()) * M_PI * winch_diameter;
         }
 
         /**

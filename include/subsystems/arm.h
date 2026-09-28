@@ -44,6 +44,7 @@ class ArmSubsystem : public Subsystem {
         void periodic() override {
             position = this->getPosition() - pos_offset.value_or(0);
             
+            // this is a really gross way to do this, but wtv
             if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 17.0)) {
                 pos_offset = position;
             }
