@@ -23,10 +23,9 @@ class ArmSubsystem : public Subsystem {
         std::optional<double> pos_offset;
         std::optional<double> position;
 
-        std::optional<double> pct;
-
         PID pid;
 
+        std::optional<double> pct;
         std::optional<double> voltage;
         std::optional<double> target;
 

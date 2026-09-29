@@ -8,16 +8,23 @@
 // This is a subsystem class for the cascade lift
 class LiftSubsystem : public Subsystem {
     private:
+        const double max_lift_height = 12.0;
+
         MotorGroup motor;
+        
         double winch_diameter;
+        bool isWinchWound = false;
 
         double position = 0;
-        std::optional<double> pct;
+        double prev_position = 0;
 
-        // other components here
+        PID pid;
+
+        std::optional<double> voltage;
+        std::optional<double> target;
 
     public:
-        explicit LiftSubsystem(MotorGroup &motors, double diameter) : motor(motors), winch_diameter(diameter) {
+        explicit LiftSubsystem(MotorGroup &motors, double diameter, const PID &pid) : motor(motors), winch_diameter(diameter), pid(pid) {
             motor.setAngle(0_stDeg);    // tare encoder upon initialization
         }
 
@@ -27,7 +34,25 @@ class LiftSubsystem : public Subsystem {
         void periodic() override {
             position = getPosition();
 
-            // todo: update and move to position with pid controller, reference arm.h
+            if (voltage) isWinchWound = checkWinchStatus(voltage.value());
+
+            // if the motor is not powered and a target is set, move with the PID controller 
+            if (!voltage && target) {
+                const auto control_out = pid.update(position);
+                printf("lift error: %f \n", position - target.value());
+                printf("lift control output: %f \n", control_out);
+                
+                if(control_out < 0 && isWinchWound) // if attempting to overwind the lift, coast motors
+                {
+                    this->brakeMotors(BrakeMode::COAST);
+                    printf("The winch seems to be wound, to avoid uneeded motor stress, skipping movement.");
+                }
+                else motor.move(control_out);       // otherwise, we chillin'
+
+                isWinchWound = checkWinchStatus(control_out);
+            }
+
+            prev_position = position;
         }
 
         double getPosition() {
@@ -39,6 +64,65 @@ class LiftSubsystem : public Subsystem {
          */
         void setPct(const double pct) {
             this->motor.move(pct);
+            voltage = pct;
+        }
+
+        void setTarget(double target) {
+            this->target = clamp(target, 0, max_lift_height);
+            pid.setTarget(
+                this->target.value()
+            );
+            voltage = std::nullopt;
+        }
+
+        void brakeMotors(BrakeMode brake_mode) {
+            motor.setBrakeMode(brake_mode);
+            motor.brake();
+        }
+
+        void stopAndHold() {
+            voltage = std::nullopt;
+            target = std::nullopt;
+            brakeMotors(BrakeMode::HOLD);
+        }
+
+        bool checkWinchStatus(double voltage){
+            // if the motor is reversed and is not moving, the winch is likely wound up
+            if(voltage < 0 && prev_position == position)
+                return true;
+            else
+                return false;
+        }
+
+        void moveToBottom() {
+            if (!isWinchWound) this->setPct(-0.25);
+            else brakeMotors(BrakeMode::COAST);     // if winch is wound, let go of lift
+        }
+
+
+        FunctionalCommand *positionCommand(double height, double threshold = 1.2) {
+        return new FunctionalCommand(
+            [this, height]() { this->setTarget(height);
+                                     }, [this, height]() { this->setTarget(height); }, [](bool _) {
+                                     }, [this, threshold, height]() {
+                                         return abs(this->getPosition() - height) < threshold;
+                                     }, {this});
+        }
+
+        FunctionalCommand *holdPositionCommand() {
+        return new FunctionalCommand([this]() {
+                                         this->stopAndHold();
+                                     }, []() {
+                                     }, [](bool _) {
+                                     }, []() { return false; }, {this});
+        }
+
+        FunctionalCommand *lowerLift() {
+        return new FunctionalCommand([this]() {
+                                         this->moveToBottom();
+                                     }, []() {
+                                     }, [](bool _) {
+                                     }, []() { return false; }, {this});
         }
 
         /**
