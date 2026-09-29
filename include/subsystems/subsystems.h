@@ -25,12 +25,13 @@ TrackingWheel horizontal_tracker(
 
 
 MotorGroup lift_motors({-11, 21}, 600_rpm); // lift motors
-const double lift_winch_diameter = 2.0;     // inches
-PID lift_pid(0.5, 0.0, 0.0, 0.0, false);
+constexpr Length lift_winch_diameter = 20_mm;
+
+PID lift_pid(0.15, 0.0, 0.0, 0.0, false);
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
-PID arm_pid(0.5, 0.0, 0.0, 0.0, false);
+PID arm_pid(0.15, 0.0, 0.0, 0.0, false);
 
 // Subsystem Objects
 LiftSubsystem *lift;
@@ -72,7 +73,6 @@ void initializeSubsystems(){
     // Move lift up on R1 and down on L1
     primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
     primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-0.6));
-
 
     primary.getTrigger(DIGITAL_B)->whileTrue(arm->positionCommand(2.0));
     primary.getTrigger(DIGITAL_L2)->whileTrue(arm->positionCommand(180.0));

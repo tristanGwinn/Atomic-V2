@@ -8,23 +8,23 @@
 // This is a subsystem class for the cascade lift
 class LiftSubsystem : public Subsystem {
     private:
-        const double max_lift_height = 12.0;
+        const Length max_lift_height = 12.0_in;
 
         MotorGroup motor;
         
-        double winch_diameter;
+        Length winch_diameter;
         bool isWinchWound = false;
 
-        double position = 0;
-        double prev_position = 0;
+        Length position = 0_cm;
+        Length prev_position = 0_cm;
 
         PID pid;
 
         std::optional<double> voltage;
-        std::optional<double> target;
+        std::optional<Length> target;
 
     public:
-        explicit LiftSubsystem(MotorGroup &motors, double diameter, const PID &pid) : motor(motors), winch_diameter(diameter), pid(pid) {
+        explicit LiftSubsystem(MotorGroup &motors, Length diameter, const PID &pid) : motor(motors), winch_diameter(diameter), pid(pid) {
             motor.setAngle(0_stDeg);    // tare encoder upon initialization
         }
 
@@ -38,7 +38,7 @@ class LiftSubsystem : public Subsystem {
 
             // if the motor is not powered and a target is set, move with the PID controller 
             if (!voltage && target) {
-                const auto control_out = pid.update(position);
+                const auto control_out = pid.update(to_cm(position));
                 printf("lift error: %f \n", position - target.value());
                 printf("lift control output: %f \n", control_out);
                 
@@ -55,7 +55,7 @@ class LiftSubsystem : public Subsystem {
             prev_position = position;
         }
 
-        double getPosition() {
+        Length getPosition() {
             return to_stRot(motor.getAngle()) * M_PI * winch_diameter;
         }
 
@@ -67,10 +67,10 @@ class LiftSubsystem : public Subsystem {
             voltage = pct;
         }
 
-        void setTarget(double target) {
+        void setTarget(Length target) {
             this->target = clamp(target, 0, max_lift_height);
             pid.setTarget(
-                this->target.value()
+                to_cm(this->target.value())
             );
             voltage = std::nullopt;
         }
@@ -100,7 +100,7 @@ class LiftSubsystem : public Subsystem {
         }
 
 
-        FunctionalCommand *positionCommand(double height, double threshold = 1.2) {
+        FunctionalCommand *positionCommand(Length height, Length threshold = 2.3_cm) {
         return new FunctionalCommand(
             [this, height]() { this->setTarget(height);
                                      }, [this, height]() { this->setTarget(height); }, [](bool _) {
