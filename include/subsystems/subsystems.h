@@ -24,7 +24,9 @@ TrackingWheel horizontal_tracker(
                             );
 
 
-MotorGroup lift_motors({-11, 21}, 600_rpm);  // lift motors
+MotorGroup lift_motors({-11, 21}, 600_rpm); // lift motors
+const double lift_winch_diameter = 2.0;     // inches
+PID lift_pid(0.5, 0.0, 0.0, 0.0, false);
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
@@ -58,7 +60,7 @@ ArmSubsystem *arm;
 void initializeSubsystems(){
     imu.tare();
 
-    lift = new LiftSubsystem(lift_motors);
+    lift = new LiftSubsystem(lift_motors, lift_winch_diameter, lift_pid);
     arm = new ArmSubsystem(arm_motors, arm_imu, imu, arm_pid);
     drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
     
