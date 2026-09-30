@@ -3,11 +3,14 @@
 #include "command/command.h"
 #include "command/runCommand.h"
 
+#include "util.hpp"
 #include "chassis/trackingWheel.hpp"
 #include "hardware/Motor/MotorGroup.hpp"
 
 class DriveSubsystem : public Subsystem {
     private:
+        DifferentialKinematics *drive_kinematics;
+
         MotorGroup left_motors;
         MotorGroup right_motors;
 
@@ -27,20 +30,21 @@ class DriveSubsystem : public Subsystem {
 
         bool track_odom = false;
         Pose pose = {0_m, 0_m, 0_stDeg};
+
     public:
-        explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
+        explicit DriveSubsystem(DifferentialKinematics *kinematics, MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu &inertial, TrackingWheel &tracker,
-                                float deadband, float minOutput, float curve)
-        : left_motors(leftmotors), right_motors(rightmotors),
+                                const float deadband, const float minOutput, const float curve)
+        : drive_kinematics(kinematics), left_motors(leftmotors), right_motors(rightmotors),
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
             calibrateTracking();
         }
 
-        explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
+        explicit DriveSubsystem(DifferentialKinematics *kinematics, MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu &inertial, TrackingWheel &tracker)
-        : left_motors(leftmotors), right_motors(rightmotors),
+        : drive_kinematics(kinematics), left_motors(leftmotors), right_motors(rightmotors),
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
             calibrateTracking();
@@ -50,14 +54,6 @@ class DriveSubsystem : public Subsystem {
             if(track_odom) {
                 updateOdom();
                 // sendOdomDebug();    // print odom data to pros brain terminal
-
-                /*
-                // help!! idk where to put this, it doesn't like to work ... rip
-                pros::lcd::print(0, "ODOM POSE");
-                pros::lcd::print(1, "x (sideways): %f \n", to_in(pose.x));
-                pros::lcd::print(2, "y (forward): %f \n", to_in(pose.y));
-                pros::lcd::print(3, "theta: %f \n", to_stDeg(pose.orientation));
-                */
             }
         }
 
@@ -147,6 +143,20 @@ class DriveSubsystem : public Subsystem {
             theta_offset = -M_PI_2 * rad;
             imu.calibrate();
             WAIT_UNTIL(imu.isCalibrated());
+        }
+
+        
+        Pose getPose(){
+            return this->pose;
+        }
+
+        void setDriveVelocities(DriveVelocities targets) {
+            // side velocity = linear velocity +/- angular velocity * track_width/2
+            const auto leftSideVelocity = targets.v - toLinear<AngularVelocity>(targets.omega, config::track_width);
+            const auto rightSideVelocity = targets.v + toLinear<AngularVelocity>(targets.omega, config::track_width);
+
+            left_motors.move(leftSideVelocity / config::max_vel);
+            right_motors.move(rightSideVelocity / config::max_vel);
         }
 
 
