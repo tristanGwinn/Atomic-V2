@@ -9,7 +9,7 @@
 #include "subsystems/lift.h"
 #include "subsystems/drivetrain.h"
 #include "subsystems/arm.h"
-
+#include "subsystems/claw.h"
 
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
@@ -23,7 +23,6 @@ TrackingWheel horizontal_tracker(
                                 -3.0_in                             // offset
                             );
 
-
 MotorGroup lift_motors({-11, 21}, 600_rpm); // lift motors
 constexpr Length lift_winch_diameter = 20_mm;
 
@@ -33,10 +32,14 @@ MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
 PID arm_pid(0.15, 0.0, 0.0, 0.0, false);
 
+pros::adi::DigitalOut claw_solenoid('A');
+pros::Distance claw_distance(15);
+
 // Subsystem Objects
 LiftSubsystem *lift;
 DriveSubsystem *drivetrain;
 ArmSubsystem *arm;
+ClawSubsystem *claw;
 
 /**
  * @brief This function runs the update scheduler at each frame with a consistent schedule
@@ -64,16 +67,19 @@ void initializeSubsystems(){
     lift = new LiftSubsystem(lift_motors, lift_winch_diameter, lift_pid);
     arm = new ArmSubsystem(arm_motors, arm_imu, imu, arm_pid);
     drivetrain = new DriveSubsystem(left_motors, right_motors, imu, horizontal_tracker);
+    claw = new ClawSubsystem(claw_solenoid, claw_distance);
     
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));   // also temporary
     CommandScheduler::registerSubsystem(arm, arm->pctCommand(0.0));
+    CommandScheduler::registerSubsystem(claw, claw->tryClampCommand());
 
+    primary.getTrigger(DIGITAL_A)->onTrue(claw->toggleClampCommand());
     
     // Move lift up on R1 and down on L1
-    primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
-    primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-0.6));
+    // primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
+    // primary.getTrigger(DIGITAL_L1)->whileTrue(lift->pctCommand(-0.6));
 
-    primary.getTrigger(DIGITAL_B)->whileTrue(arm->positionCommand(2.0));
-    primary.getTrigger(DIGITAL_L2)->whileTrue(arm->positionCommand(180.0));
+    // primary.getTrigger(DIGITAL_B)->whileTrue(arm->positionCommand(2.0));
+    // primary.getTrigger(DIGITAL_L2)->whileTrue(arm->positionCommand(180.0));
 }
