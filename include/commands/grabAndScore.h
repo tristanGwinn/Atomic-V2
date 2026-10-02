@@ -12,7 +12,6 @@
  * this command will wait until the claw detects
  * an object, proceed to grab it, and then move the
  * arm (chain bar) and cascade lift to the desired position
- * 
  */
 class GrabAndScore : public Command {
     private:
@@ -37,6 +36,8 @@ class GrabAndScore : public Command {
         // before writing this, move to position functionality to the cascade lift subsystem
         void execute() override {
             // wait until the claw has detected a cup [ with claw->getCupStatus() ]
+
+            
 
             // move the arm and lift (in whatever order we decide)
             // ↑↑↑ this is probably best accomplished using motion profiling, 

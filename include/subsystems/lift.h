@@ -34,22 +34,23 @@ class LiftSubsystem : public Subsystem {
         void periodic() override {
             position = getPosition();
 
-            if (voltage) isWinchWound = checkWinchStatus(voltage.value());
+            // if (voltage) isWinchWound = checkWinchStatus(voltage.value());
 
             // if the motor is not powered and a target is set, move with the PID controller 
             if (!voltage && target) {
                 const auto control_out = pid.update(to_cm(position));
                 printf("lift error: %f \n", position - target.value());
                 printf("lift control output: %f \n", control_out);
-                
-                if(control_out < 0 && isWinchWound) // if attempting to overwind the lift, coast motors
-                {
-                    this->brakeMotors(BrakeMode::COAST);
-                    printf("The winch seems to be wound, to avoid uneeded motor stress, skipping movement.");
-                }
-                else motor.move(control_out);       // otherwise, we chillin'
+                motor.move(control_out); 
 
-                isWinchWound = checkWinchStatus(control_out);
+                // if(control_out < 0 && isWinchWound) // if attempting to overwind the lift, coast motors
+                // {
+                //     this->brakeMotors(BrakeMode::COAST);
+                //     printf("The winch seems to be wound, to avoid uneeded motor stress, skipping movement.");
+                // }
+                // else motor.move(control_out);       // otherwise, we chillin'
+
+                // isWinchWound = checkWinchStatus(control_out);
             }
 
             prev_position = position;
@@ -68,7 +69,7 @@ class LiftSubsystem : public Subsystem {
         }
 
         void setTarget(Length target) {
-            this->target = clamp(target, 0, max_lift_height);
+            this->target = clamp(target, 0_m, max_lift_height);
             pid.setTarget(
                 to_cm(this->target.value())
             );
@@ -86,6 +87,7 @@ class LiftSubsystem : public Subsystem {
             brakeMotors(BrakeMode::HOLD);
         }
 
+        // this function is pretty much useless
         bool checkWinchStatus(double voltage){
             // if the motor is reversed and is not moving, the winch is likely wound up
             if(voltage < 0 && prev_position == position)
@@ -94,10 +96,10 @@ class LiftSubsystem : public Subsystem {
                 return false;
         }
 
-        void moveToBottom() {
-            if (!isWinchWound) this->setPct(-0.25);
-            else brakeMotors(BrakeMode::COAST);     // if winch is wound, let go of lift
-        }
+        // void moveToBottom() {
+        //     // if (!isWinchWound) this->setPct(-0.25);  // im dumb we dont need this
+        //     brakeMotors(BrakeMode::COAST);
+        // }
 
 
         FunctionalCommand *positionCommand(Length height, Length threshold = 2.3_cm) {
@@ -119,7 +121,9 @@ class LiftSubsystem : public Subsystem {
 
         FunctionalCommand *lowerLift() {
         return new FunctionalCommand([this]() {
-                                         this->moveToBottom();
+                                         this->voltage = std::nullopt;
+                                         this->target = std::nullopt;
+                                         this->brakeMotors(BrakeMode::COAST);
                                      }, []() {
                                      }, [](bool _) {
                                      }, []() { return false; }, {this});

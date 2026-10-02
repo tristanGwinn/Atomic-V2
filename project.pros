@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Atomic-V2 (ARM CODE BAD)",
+    "project_name": "Atomic-V2 (TESTING)",
     "target": "v5",
     "templates": {
       "kernel": {
