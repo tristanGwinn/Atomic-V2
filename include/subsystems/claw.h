@@ -11,8 +11,6 @@
 
 #include "hardware/Motor/MotorGroup.hpp"
 
-// todo
-
 // this could probably be simplified by making an abstract class for a solenoid subsystem,
 // but this works so its not important. (simplifying would likely reduce compile time)
 class ClawSubsystem : public Subsystem {
@@ -22,10 +20,12 @@ class ClawSubsystem : public Subsystem {
 
         // maybe put this in config, idk
         // currently, this is an untested placeholder
-        Length threshold = 1.5_in;
+        Length threshold = 2.0_in;
 
         bool lastValue = false;
         bool isCupDetected = false;
+
+        bool allowedToClamp = false;
 
     public:
         
@@ -33,11 +33,17 @@ class ClawSubsystem : public Subsystem {
         : solenoid(solenoid), distance(dist) {
             // prolly dont need anything here
         }
-        
+
         void periodic() override {
             // check if cup is in range
-            (to_mm(threshold) > distance.get_distance()) ?
+            (threshold >= from_mm(distance.get_distance())) ?
             isCupDetected = true : isCupDetected = false;
+        
+            printf("Is a cup detected? %s", isCupDetected ? "Yes.\n" : "No.\n");
+        }
+
+        void allowClamp(const bool value) {
+            allowedToClamp = value;
         }
 
         void setLevel(const bool value) {
@@ -46,6 +52,21 @@ class ClawSubsystem : public Subsystem {
         }
 
         bool getCupStatus() { return isCupDetected; }
+
+        RunCommand *toggleClampCommand() {
+            return new RunCommand([this]() { this->allowClamp(!this->allowedToClamp); }, {this});
+        }
+
+        RunCommand *tryClampCommand() {
+            return new RunCommand(
+                [this] ()
+                {
+                    if (allowedToClamp) this->setLevel(true);
+                    else this->setLevel(false);
+                },
+                {this}
+            );
+        }
 
         RunCommand *levelCommand(bool value) {
             return new RunCommand([this, value]() { this->setLevel(value); }, {this});

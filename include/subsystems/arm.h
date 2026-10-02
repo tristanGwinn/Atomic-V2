@@ -17,7 +17,7 @@ class ArmSubsystem : public Subsystem {
         pros::Imu imu;
         pros::Imu chassis_imu;
 
-        double max_init_delta = 0.1;    // this should be somewhere between 0.6 and 1
+        double max_init_delta = 0.001;    // this should be pretty low
         double prev_position = 0;
 
         std::optional<double> pos_offset;
@@ -44,7 +44,7 @@ class ArmSubsystem : public Subsystem {
             position = this->getPosition() - pos_offset.value_or(0);
             
             // this is a really gross way to do this, but wtv
-            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 17.0)) {
+            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 32.0)) {
                 pos_offset = position;
             }
             prev_position = position.value();
@@ -63,11 +63,11 @@ class ArmSubsystem : public Subsystem {
 
         double getPosition() const {
             double arm_roll = imu.get_roll();
-            arm_roll -= chassis_imu.get_roll();    // account for the roll of the chassis imu
+            arm_roll -= chassis_imu.get_roll() + 5;    // account for the roll of the chassis imu.
 
             // convert the roll into a rotation value (where 180 is the facing up)
             auto pos = (arm_roll < 0) ?
-                        fabs(arm_roll) : 360 - arm_roll; 
+                        360 + arm_roll : arm_roll; 
             return pos;    
         }
 
