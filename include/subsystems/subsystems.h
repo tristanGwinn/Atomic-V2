@@ -11,6 +11,8 @@
 #include "subsystems/arm.h"
 #include "subsystems/claw.h"
 
+#include "commands/grabAndScore.h"
+
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
 MotorGroup left_motors({-10, -9}, 450_rpm);
@@ -26,20 +28,22 @@ TrackingWheel horizontal_tracker(
 MotorGroup lift_motors({-11, 21}, 600_rpm); // lift motors
 constexpr Length lift_winch_diameter = 20_mm;
 
-PID lift_pid(0.15, 0.0, 0.0, 0.0, false);
+PID lift_pid(0.10, 0.0, 0.0, 0.0, false);
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
 PID arm_pid(0.15, 0.0, 0.0, 0.0, false);
 
 pros::adi::DigitalOut claw_solenoid('A');
-pros::Distance claw_distance(15);
+pros::Distance claw_distance(16);
 
 // Subsystem Objects
 LiftSubsystem *lift;
 DriveSubsystem *drivetrain;
 ArmSubsystem *arm;
 ClawSubsystem *claw;
+
+GrabAndScore *scorePos1;
 
 /**
  * @brief This function runs the update scheduler at each frame with a consistent schedule
@@ -72,9 +76,34 @@ void initializeSubsystems(){
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->pctCommand(0.0));   // also temporary
     CommandScheduler::registerSubsystem(arm, arm->pctCommand(0.0));
-    CommandScheduler::registerSubsystem(claw, claw->tryClampCommand());
+    CommandScheduler::registerSubsystem(claw, claw->primeClampCommand());
+    claw->levelCommand(true);
 
-    primary.getTrigger(DIGITAL_A)->onTrue(claw->toggleClampCommand());
+    scorePos1 = new GrabAndScore(lift, arm, claw, {180.0, 6.0});
+
+    primary.getTrigger(DIGITAL_A)->onTrue(scorePos1);
+    primary.getTrigger(DIGITAL_UP)
+        ->onTrue(
+                arm->positionCommand(180.0)
+                   ->andThen(arm->holdPositionCommand())
+            );
+    primary.getTrigger(DIGITAL_LEFT)
+        ->onTrue(
+                lift->positionCommand(6_in)
+                    ->andThen(lift->holdPositionCommand())
+            );
+
+    primary.getTrigger(DIGITAL_B)->onTrue(
+        new ParallelCommandGroup({
+            lift->positionCommand(0_in)
+                ->andThen(lift->dropLiftCommand()),
+            arm->positionCommand(40)
+               ->andThen(arm->pctCommand(-1))
+               ->withTimeout(1_sec)
+               ->andThen(arm->dropArmCommand())
+        })
+    );
+
     
     // Move lift up on R1 and down on L1
     // primary.getTrigger(DIGITAL_R1)->whileTrue(lift->pctCommand(0.85));
@@ -82,4 +111,7 @@ void initializeSubsystems(){
 
     // primary.getTrigger(DIGITAL_B)->whileTrue(arm->positionCommand(2.0));
     // primary.getTrigger(DIGITAL_L2)->whileTrue(arm->positionCommand(180.0));
+
+    
+    printf("Subsystems have been set up!\n");
 }

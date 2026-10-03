@@ -180,7 +180,23 @@ class Command {
          */
         Command *until(const std::function<bool> &isFinished);
 
+        /**
+         * @brief Create a \refitem ParallelCommandGroup with this and 'other'
+         *
+         * @param other Other command for the \refitem ParallelCommandGroup
+         * @return \refitem ParallelCommandGroup with this and other
+         */
+        Command *with(Command *other);
         
+        /**
+         * @brief Create a \refitem ParallelRaceGroup with this and other
+         *
+         * @param other Other command for the \refitem ParallelRaceGroup
+         * @return \refitem ParallelRaceGroup with this and other
+         */
+        Command *race(Command *other);
+
+
         /////
         //
         //  BELOW ARE UNIMPLEMENTED FEATURES FROM ECHO'S COMMAND SCHEDULER.
@@ -189,21 +205,6 @@ class Command {
         //
         /////
 
-        /**
-         * @brief Create a \refitem ParallelCommandGroup with this and 'other'
-         *
-         * @param other Other command for the \refitem ParallelCommandGroup
-         * @return \refitem ParallelCommandGroup with this and other
-         */
-        // Command *with(Command *other);
-
-        /**
-         * @brief Create a \refitem ParallelRaceGroup with this and other
-         *
-         * @param other Other command for the \refitem ParallelRaceGroup
-         * @return \refitem ParallelRaceGroup with this and other
-         */
-        // Command *race(Command *other);
 
         /**
          * @brief Create a \refitem RepeatCommand with this
