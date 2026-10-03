@@ -22,6 +22,9 @@ inline PID angular_pid = PID(0, 0, 0, 0, false);
 inline PID lateral_pid = PID(0, 0, 0, 0, false);
 
 // Physical robot variables
+
+constexpr Number lift_slope = 6.368 / 1.308;
+
 constexpr Length track_width = 11.50_in;
 constexpr Length wheel_diameter = 2.75_in;
 constexpr AngularVelocity max_rpm = 450 * rpm;

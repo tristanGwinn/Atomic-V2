@@ -119,7 +119,7 @@ class LiftSubsystem : public Subsystem {
                                      }, []() { return false; }, {this});
         }
 
-        FunctionalCommand *lowerLift() {
+        FunctionalCommand *dropLiftCommand() {
         return new FunctionalCommand([this]() {
                                          this->voltage = std::nullopt;
                                          this->target = std::nullopt;

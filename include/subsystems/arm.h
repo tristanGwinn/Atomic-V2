@@ -44,20 +44,20 @@ class ArmSubsystem : public Subsystem {
             position = this->getPosition() - pos_offset.value_or(0);
             
             // this is a really gross way to do this, but wtv
-            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 32.0)) {
+            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 26.0)) {
                 pos_offset = position;
             }
             prev_position = position.value();
 
-            printf("arm roll: %f \n", imu.get_roll());
-            printf("arm position: %f \n", position);
-            printf("arm position offset: %f \n", pos_offset.value_or(0));
+            // printf("arm roll: %f \n", imu.get_roll());
+            // printf("arm position offset: %f \n", pos_offset.value_or(0));
 
             if (!voltage.has_value() && target.has_value()) {
-                 const auto control_out = pid.update(position.value());
-                 printf("arm error: %f \n", position.value() - target.value());
-                 printf("arm control output: %f \n", control_out);
-                 motor.move(control_out);
+                const auto control_out = pid.update(position.value());
+                printf("arm position: %f \n", position);
+                printf("arm error: %f \n", position.value() - target.value());
+                printf("arm control output: %f \n", control_out);
+                motor.move(control_out);
             }
         }
 
@@ -107,6 +107,16 @@ class ArmSubsystem : public Subsystem {
         FunctionalCommand *holdPositionCommand() {
         return new FunctionalCommand([this]() {
                                          this->stopAndHold();
+                                     }, []() {
+                                     }, [](bool _) {
+                                     }, []() { return false; }, {this});
+        }
+
+        FunctionalCommand *dropArmCommand() {
+        return new FunctionalCommand([this]() {
+                                         this->voltage = std::nullopt;
+                                         this->target = std::nullopt;
+                                         this->brakeMotors(BrakeMode::COAST);
                                      }, []() {
                                      }, [](bool _) {
                                      }, []() { return false; }, {this});
