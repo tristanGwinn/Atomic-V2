@@ -25,7 +25,15 @@ class ClawSubsystem : public Subsystem {
         bool lastValue = false;
         bool isCupDetected = false;
 
-        bool allowedToClamp = false;
+        bool primedToClamp = false;
+        bool isClawClamped = false;
+
+        void allowClamp(const bool value) { primedToClamp = value; }
+
+        void setLevel(const bool value) {
+            solenoid.set_value(value);
+            lastValue = value;
+        }
 
     public:
         
@@ -35,33 +43,30 @@ class ClawSubsystem : public Subsystem {
         }
 
         void periodic() override {
+            // auto distance_value = distance.get_distance();
+
             // check if cup is in range
             (threshold >= from_mm(distance.get_distance())) ?
             isCupDetected = true : isCupDetected = false;
+        }
+
+
+        bool getCupStatus() { printf("Is a cup detected? %s", isCupDetected ? "Yes.\n" : "No.\n"); printf("cup distance sensor: %d\n", distance.get_distance()); return isCupDetected; }
+
+        bool getClampStatus() { return isClawClamped; }
         
-            printf("Is a cup detected? %s", isCupDetected ? "Yes.\n" : "No.\n");
-        }
+        bool isPrimed() { return primedToClamp; }
 
-        void allowClamp(const bool value) {
-            allowedToClamp = value;
-        }
 
-        void setLevel(const bool value) {
-            solenoid.set_value(value);
-            lastValue = value;
-        }
-
-        bool getCupStatus() { return isCupDetected; }
-
-        RunCommand *toggleClampCommand() {
-            return new RunCommand([this]() { this->allowClamp(!this->allowedToClamp); }, {this});
+        RunCommand *primeClampCommand() {
+            return new RunCommand([this]() { this->allowClamp(true); }, {this});
         }
 
         RunCommand *tryClampCommand() {
             return new RunCommand(
                 [this] ()
                 {
-                    if (allowedToClamp) this->setLevel(true);
+                    if (primedToClamp) this->setLevel(true);
                     else this->setLevel(false);
                 },
                 {this}
@@ -69,7 +74,12 @@ class ClawSubsystem : public Subsystem {
         }
 
         RunCommand *levelCommand(bool value) {
-            return new RunCommand([this, value]() { this->setLevel(value); }, {this});
+            return new RunCommand([this, value]() {
+                    this->setLevel(value);
+                    this->isClawClamped = value;
+                }, 
+                {this}
+            );
         }
 
         [[nodiscard]] bool getLastValue() const { return lastValue; }
