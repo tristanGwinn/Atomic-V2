@@ -34,23 +34,12 @@ class LiftSubsystem : public Subsystem {
         void periodic() override {
             position = getPosition();
 
-            // if (voltage) isWinchWound = checkWinchStatus(voltage.value());
-
             // if the motor is not powered and a target is set, move with the PID controller 
             if (!voltage && target) {
                 const auto control_out = pid.update(to_cm(position));
-                printf("lift error: %f \n", position - target.value());
-                printf("lift control output: %f \n", control_out);
+                // printf("lift error: %f inches\n", to_in(position) - to_in(target.value()));
+                // printf("lift control output: %f \n", control_out.internal());
                 motor.move(control_out); 
-
-                // if(control_out < 0 && isWinchWound) // if attempting to overwind the lift, coast motors
-                // {
-                //     this->brakeMotors(BrakeMode::COAST);
-                //     printf("The winch seems to be wound, to avoid uneeded motor stress, skipping movement.");
-                // }
-                // else motor.move(control_out);       // otherwise, we chillin'
-
-                // isWinchWound = checkWinchStatus(control_out);
             }
 
             prev_position = position;
@@ -58,6 +47,10 @@ class LiftSubsystem : public Subsystem {
 
         Length getPosition() {
             return to_stRot(motor.getAngle()) * M_PI * winch_diameter;
+        }
+
+        Length getTarget() {
+            return target.value();
         }
 
         /**
@@ -77,24 +70,24 @@ class LiftSubsystem : public Subsystem {
         }
 
         void brakeMotors(BrakeMode brake_mode) {
+            voltage = std::nullopt;
+            target = std::nullopt;
             motor.setBrakeMode(brake_mode);
             motor.brake();
         }
 
         void stopAndHold() {
-            voltage = std::nullopt;
-            target = std::nullopt;
             brakeMotors(BrakeMode::HOLD);
         }
 
         // this function is pretty much useless
-        bool checkWinchStatus(double voltage){
+        /*bool checkWinchStatus(double voltage){
             // if the motor is reversed and is not moving, the winch is likely wound up
             if(voltage < 0 && prev_position == position)
                 return true;
             else
                 return false;
-        }
+        }*/
 
         // void moveToBottom() {
         //     // if (!isWinchWound) this->setPct(-0.25);  // im dumb we dont need this
@@ -103,12 +96,18 @@ class LiftSubsystem : public Subsystem {
 
 
         FunctionalCommand *positionCommand(Length height, Length threshold = 2.3_cm) {
-        return new FunctionalCommand(
-            [this, height]() { this->setTarget(height);
-                                     }, [this, height]() { this->setTarget(height); }, [](bool _) {
-                                     }, [this, threshold, height]() {
-                                         return abs(this->getPosition() - height) < threshold;
-                                     }, {this});
+            std::cout << "The lift target position is set to " << height 
+                      << " with a tolerance of " << threshold << std::endl;
+            return new FunctionalCommand(
+                [this, height]() { this->setTarget(height);
+                                         }, [this, height]() { this->setTarget(height);
+                                         }, [this](bool _) {
+                                             printf("The lift is within tolerence of its target.\n");
+                                             this->target = std::nullopt;
+                                         }, [this, threshold, height]() {
+                                             return abs(this->getPosition() - target.value()) < threshold;
+                                         }, {this}
+            );
         }
 
         FunctionalCommand *holdPositionCommand() {
@@ -121,8 +120,6 @@ class LiftSubsystem : public Subsystem {
 
         FunctionalCommand *dropLiftCommand() {
         return new FunctionalCommand([this]() {
-                                         this->voltage = std::nullopt;
-                                         this->target = std::nullopt;
                                          this->brakeMotors(BrakeMode::COAST);
                                      }, []() {
                                      }, [](bool _) {

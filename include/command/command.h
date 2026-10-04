@@ -178,8 +178,7 @@ class Command {
          * @return \refitem ParallelRaceGroup with this and \refitem WaitUntilCommand
          * with the desired 'isFinish'
          */
-        Command *until(const std::function<bool> &isFinished);
-
+        Command *until(const std::function<bool()> &isFinished);
         /**
          * @brief Create a \refitem ParallelCommandGroup with this and 'other'
          *

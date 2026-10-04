@@ -2,6 +2,7 @@
 
 #include "command/command.h"
 #include "command/runCommand.h"
+#include "command/waitUntilCommand.h"
 
 #include "controllers/pid.hpp"
 
@@ -28,13 +29,6 @@ class ClawSubsystem : public Subsystem {
         bool primedToClamp = false;
         bool isClawClamped = false;
 
-        void allowClamp(const bool value) { primedToClamp = value; }
-
-        void setLevel(const bool value) {
-            solenoid.set_value(value);
-            lastValue = value;
-        }
-
     public:
         
         explicit ClawSubsystem(pros::adi::DigitalOut &solenoid, pros::v5::Distance &dist)
@@ -46,19 +40,40 @@ class ClawSubsystem : public Subsystem {
             // auto distance_value = distance.get_distance();
 
             // check if cup is in range
-            (threshold >= from_mm(distance.get_distance())) ?
-            isCupDetected = true : isCupDetected = false;
+            if (threshold >= from_mm(distance.get_distance())){
+                // if (!isCupDetected) printf("Cup has been detected!\n");
+                isCupDetected = true;
+
+            }else{
+                // if (isCupDetected) printf("Cup has moved from view :(\n");
+                isCupDetected = false;
+            }
+        }
+
+        // void allowClamp(const bool value) { primedToClamp = value; }
+
+        void setLevel(const bool value) {
+            if(isClawClamped != value) 
+                printf("%s\n", (value) ? "The claw has been clamped!" : "The claw has been opened!");
+            solenoid.set_value(value);
+            lastValue = value;
         }
 
 
-        bool getCupStatus() { printf("Is a cup detected? %s", isCupDetected ? "Yes.\n" : "No.\n"); printf("cup distance sensor: %d\n", distance.get_distance()); return isCupDetected; }
+        bool getCupStatus() { return isCupDetected; }
 
         bool getClampStatus() { return isClawClamped; }
         
         bool isPrimed() { return primedToClamp; }
 
 
-        RunCommand *primeClampCommand() {
+        /*FunctionalCommand *waitForCupCommand() {
+            printf("Claw is waiting on cup ... ");
+            return new FunctionalCommand(
+                [this]() {}, [this]() {}, [this](bool _) {}, [this]() {return this->getCupStatus(); }, {this});
+        }*/
+
+        /*RunCommand *primeClampCommand() {
             return new RunCommand([this]() { this->allowClamp(true); }, {this});
         }
 
@@ -69,6 +84,16 @@ class ClawSubsystem : public Subsystem {
                     if (primedToClamp) this->setLevel(true);
                     else this->setLevel(false);
                 },
+                {this}
+            );
+        }*/
+
+        FunctionalCommand *clampWhenReadyCommand(){ 
+            return new FunctionalCommand(
+                [this]() { this->setLevel(false); printf("\nWaiting for cup ...\n"); }, 
+                [this]() {},
+                [this](bool _) { this->setLevel(true); printf("Cup detected, clamp activated!\n\n"); },
+                [this]() { return getCupStatus(); },
                 {this}
             );
         }
