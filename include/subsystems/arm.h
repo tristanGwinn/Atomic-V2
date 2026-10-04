@@ -49,14 +49,11 @@ class ArmSubsystem : public Subsystem {
             }
             prev_position = position.value();
 
-            // printf("arm roll: %f \n", imu.get_roll());
-            // printf("arm position offset: %f \n", pos_offset.value_or(0));
-
             if (!voltage.has_value() && target.has_value()) {
                 const auto control_out = pid.update(position.value());
-                printf("arm position: %f \n", position);
-                printf("arm error: %f \n", position.value() - target.value());
-                printf("arm control output: %f \n", control_out);
+                // printf("arm position: %f \n", position);
+                // printf("arm error: %f \n", position.value() - target.value());
+                // printf("arm control output: %f \n", control_out.internal());
                 motor.move(control_out);
             }
         }
@@ -71,6 +68,10 @@ class ArmSubsystem : public Subsystem {
             return pos;    
         }
 
+        double getTarget() {
+            return target.value();
+        }
+
         /**
          * Move the lift motors at a signed percentage of voltage
          */
@@ -79,26 +80,36 @@ class ArmSubsystem : public Subsystem {
         }
 
         void setTarget(double target) {
+            this->target = clamp(target, 0, 260);
+            pid.setTarget(
+                this->target.value()
+            );
+            voltage = std::nullopt;
             pid.setTarget(target);
             this->target = target;
             voltage = std::nullopt;
         }
 
         void brakeMotors(BrakeMode brake_mode) {
+            voltage = std::nullopt;
+            target = std::nullopt;
             motor.setBrakeMode(brake_mode);
             motor.brake();
         }
 
         void stopAndHold() {
-            voltage = std::nullopt;
-            target = std::nullopt;
             brakeMotors(BrakeMode::HOLD);
         }
 
         FunctionalCommand *positionCommand(double angle, double threshold = 8.0) {
+            std::cout << "The arm target position is set to " << angle 
+                      << "° with a tolerance of " << threshold << "°" << std::endl;
         return new FunctionalCommand(
             [this, angle]() { this->setTarget(angle);
-                                     }, [this, angle]() { this->setTarget(angle); }, [](bool _) {
+                                     }, [this, angle]() { this->setTarget(angle);
+                                     }, [this](bool _) {
+                                         printf("The arm is within tolerence of its target.\n");
+                                         this->target = std::nullopt;
                                      }, [this, threshold, angle]() {
                                          return abs(this->getPosition() - angle) < threshold;
                                      }, {this});
@@ -114,8 +125,6 @@ class ArmSubsystem : public Subsystem {
 
         FunctionalCommand *dropArmCommand() {
         return new FunctionalCommand([this]() {
-                                         this->voltage = std::nullopt;
-                                         this->target = std::nullopt;
                                          this->brakeMotors(BrakeMode::COAST);
                                      }, []() {
                                      }, [](bool _) {
