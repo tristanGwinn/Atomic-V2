@@ -40,12 +40,13 @@ class ClawSubsystem : public Subsystem {
             // auto distance_value = distance.get_distance();
 
             // check if cup is in range
-            if (threshold >= from_mm(distance.get_distance())){
-                // if (!isCupDetected) printf("Cup has been detected!\n");
+            if (55_mm <= from_mm(distance.get_distance()) &&
+                120_mm >= from_mm(distance.get_distance())){
+                if (!isCupDetected) printf("Cup has been detected!\n");
                 isCupDetected = true;
 
             }else{
-                // if (isCupDetected) printf("Cup has moved from view :(\n");
+                if (isCupDetected) printf("Cup has moved from view :(\n");
                 isCupDetected = false;
             }
         }
@@ -66,28 +67,7 @@ class ClawSubsystem : public Subsystem {
         
         bool isPrimed() { return primedToClamp; }
 
-
-        /*FunctionalCommand *waitForCupCommand() {
-            printf("Claw is waiting on cup ... ");
-            return new FunctionalCommand(
-                [this]() {}, [this]() {}, [this](bool _) {}, [this]() {return this->getCupStatus(); }, {this});
-        }*/
-
-        /*RunCommand *primeClampCommand() {
-            return new RunCommand([this]() { this->allowClamp(true); }, {this});
-        }
-
-        RunCommand *tryClampCommand() {
-            return new RunCommand(
-                [this] ()
-                {
-                    if (primedToClamp) this->setLevel(true);
-                    else this->setLevel(false);
-                },
-                {this}
-            );
-        }*/
-
+        
         FunctionalCommand *clampWhenReadyCommand(){ 
             return new FunctionalCommand(
                 [this]() { this->setLevel(false); printf("\nWaiting for cup ...\n"); }, 

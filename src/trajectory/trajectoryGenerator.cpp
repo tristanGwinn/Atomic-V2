@@ -92,27 +92,49 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
         i--;
     }
 
+
+    std::cout << "\nTime Parameterizing Trajectory: \n" << std::endl;
+
     Time path_time = 0_sec;
+    auto currentState = trajectoryStates[0];
     lastState = trajectoryStates[0];
     // Time parameterize the path
-    for (Trajectory::State state : trajectoryStates) {
-        // delta x = v_0 * t + ½a * t^2 → t = ( -v_0 ± sqrt( v_0^2 ) ) / a
-        // Ms. Korzan would be very proud if she saw this ^^
+    for (int i = 0; i <= trajectoryStates.size() - 1; i++) {
+        currentState = trajectoryStates[i];
 
         // v_f^2 = v_0^2 + 2 * a * delta_x → a = ( v_f^2 - v_0^2 ) / ( 2 * delta_x )
-        LinearAcceleration segmentAccel = 
-            ( units::square(state.linearVelocity) - units::square(lastState.linearVelocity) ) / 
-            ( 2 * state.pose.distanceTo(lastState.pose) );
+        LinearAcceleration segmentAccel = currentState.pose.distanceTo(lastState.pose).internal() == 0 ? 
+            0_mps2 :
+            ( units::square(currentState.linearVelocity) - units::square(lastState.linearVelocity) ) / 
+            ( 2 * currentState.pose.distanceTo(lastState.pose) );
 
-        LinearVelocity determinate = units::sqrt( units::square(lastState.linearVelocity) );
+        // delta x = v_0 * t + ½a * t^2 → t = ( -v_0 ± sqrt( v_0^2 + 2 * a * delta_x) ) / a
+        // Ms. Korzan would be very proud if she saw this ^^
+        LinearVelocity determinate = units::sqrt( units::square(lastState.linearVelocity) + 2 * segmentAccel * currentState.pose.distanceTo(lastState.pose));
         
-        path_time += units::max(determinate - lastState.linearVelocity, 
-                                -(determinate + lastState.linearVelocity) )
+        path_time += segmentAccel.internal() == 0 ? 0_sec :
+                     units::max(-lastState.linearVelocity + determinate, 
+                                -lastState.linearVelocity - determinate)
                      / segmentAccel;
 
-        state.t = path_time;
-        lastState = state;
+        currentState.t = path_time;
+        lastState = currentState;
+
+        std::cout << "Delta X: " << currentState.pose.distanceTo(lastState.pose)
+                  << "\nState Velocity: " << currentState.linearVelocity
+                  << "\nSegment Acceleration: " << segmentAccel
+                  << "\nTime: " << currentState.t
+                  << "\nPose: ( " 
+                    << to_in(currentState.pose.x) << " in, " 
+                    << to_in(currentState.pose.y) << "in, " 
+                    << to_stDeg(currentState.pose.orientation) << "deg )\n"
+                  << std::endl;
+
+        trajectoryStates[i] = currentState;
     }
+
+    std::cout << "\nFinished generating the Trajectory.\n"
+              << "Total path time: " << trajectoryStates.back().t << std::endl;
 }
 
 std::vector<Trajectory::State> TrajectoryGenerator::getTrajectory() { return trajectoryStates; }

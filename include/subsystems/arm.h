@@ -21,7 +21,7 @@ class ArmSubsystem : public Subsystem {
         double prev_position = 0;
 
         std::optional<double> pos_offset;
-        std::optional<double> position;
+        double position = 0;
 
         PID pid;
 
@@ -44,13 +44,13 @@ class ArmSubsystem : public Subsystem {
             position = this->getPosition() - pos_offset.value_or(0);
             
             // this is a really gross way to do this, but wtv
-            if (!pos_offset.has_value() && (fabs(position.value() - prev_position) < max_init_delta && position.value() > 26.0)) {
+            if (!pos_offset.has_value() && (fabs(position - prev_position) < max_init_delta && position > 26.0)) {
                 pos_offset = position;
             }
-            prev_position = position.value();
+            prev_position = position;
 
             if (!voltage.has_value() && target.has_value()) {
-                const auto control_out = pid.update(position.value());
+                const auto control_out = pid.update(position);
                 // printf("arm position: %f \n", position);
                 // printf("arm error: %f \n", position.value() - target.value());
                 // printf("arm control output: %f \n", control_out.internal());
@@ -69,7 +69,7 @@ class ArmSubsystem : public Subsystem {
         }
 
         double getTarget() {
-            return target.value();
+            return target.value_or(-1);
         }
 
         /**

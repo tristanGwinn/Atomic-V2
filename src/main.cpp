@@ -54,18 +54,18 @@ void autonomous() {
     printf("testing Ramsete\n");
 
   	CubicBezier *testPath;
-  	testPath = new CubicBezier({0_in, 0_in}, {0_in, 16_in}, {16_in, 0_in}, {16_in, 16_in});
+  	testPath = new CubicBezier({0_in, 0_in}, {12_in, 12_in}, {0_in, 36_in}, {0_in, 48_in});
     printf("test path created\n");
 
-  	TrajectoryGenerator generator(config::robot_kinematics, 3_in);
+  	TrajectoryGenerator generator(config::robot_kinematics, 0.5_in);
     printf("generator created\n");
 
   	generator.generateTrajectory(testPath);
 
 	auto pathTrajectory = new Trajectory(generator.getTrajectory());
-	std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
+	// std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
 
-    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, 0.7, 1.0);
+    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, 0.7, 1.0);
 	followTestTrajectory->schedule();
 }
 

@@ -23,6 +23,7 @@ class ResetArmLift : public Command {
         : lift(lift), arm(arm) {}
 
         void initialize() override {
+            printf("Resetting the Arm and Lift positions ...\n");
             lift->setTarget(lift->getPosition() - 4_in);
 
             // dont move the arm unless needed
@@ -37,13 +38,13 @@ class ResetArmLift : public Command {
         bool isFinished() override {
             return 
                 abs(lift->getPosition() - lift->getTarget()) < 1_in &&
-                abs(arm->getPosition() - arm->getTarget()) < 20;
+                (arm->getTarget() == -1) ? true : abs(arm->getPosition() - arm->getTarget()) < 20;
         }
 
         void end(bool interupted) override {
             lift->brakeMotors(BrakeMode::COAST);
             arm->brakeMotors(BrakeMode::COAST);
-            printf("Reset Arm and Lift positions\n");
+            printf("DONE\n");
         }
 
         std::vector<Subsystem *> getRequirements() override { return {lift, arm}; }
