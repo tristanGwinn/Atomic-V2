@@ -94,7 +94,7 @@ Trajectory::State Trajectory::sample(Time t) const {
         return *sample;
     }
     // Interpolate between the two states for the state that we want.
-    return prevSample->interpolate(
+    return prevSample->interpolate(     // The interpolant is the (sampled time - lower existing sample's time) / (upper existing sample's time - lower existing sample's time)
         *sample, (t - prevSample->t).convert(sec) / (sample->t - prevSample->t).convert(sec));
 }
 

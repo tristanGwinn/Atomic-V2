@@ -21,6 +21,7 @@
 #include "main.h"
 #include "pros/imu.hpp"
 #include "config.hpp"
+
 #include "subsystems/subsystems.h"
 
 #include "pros/llemu.hpp"
@@ -48,6 +49,24 @@ void disabled() {}
 
 void competition_initialize() {}
 
-void autonomous() {}
+void autonomous() {
+
+    printf("testing Ramsete\n");
+
+  	CubicBezier *testPath;
+  	testPath = new CubicBezier({0_in, 0_in}, {0_in, 16_in}, {16_in, 0_in}, {16_in, 16_in});
+    printf("test path created\n");
+
+  	TrajectoryGenerator generator(config::robot_kinematics, 3_in);
+    printf("generator created\n");
+
+  	generator.generateTrajectory(testPath);
+
+	auto pathTrajectory = new Trajectory(generator.getTrajectory());
+	std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
+
+    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, 0.7, 1.0);
+	followTestTrajectory->schedule();
+}
 
 void opcontrol() {}

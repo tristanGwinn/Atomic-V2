@@ -62,7 +62,7 @@ class LiftSubsystem : public Subsystem {
         }
 
         void setTarget(Length target) {
-            this->target = clamp(target, 0_m, max_lift_height);
+            this->target = units::clamp(target, 0_m, max_lift_height);
             pid.setTarget(
                 to_cm(this->target.value())
             );
@@ -105,7 +105,7 @@ class LiftSubsystem : public Subsystem {
                                              printf("The lift is within tolerence of its target.\n");
                                              this->target = std::nullopt;
                                          }, [this, threshold, height]() {
-                                             return abs(this->getPosition() - target.value()) < threshold;
+                                             return units::abs(this->getPosition() - target.value()) < threshold;
                                          }, {this}
             );
         }

@@ -9,7 +9,7 @@
 
 class DriveSubsystem : public Subsystem {
     private:
-        DifferentialKinematics *drive_kinematics;
+        // DifferentialKinematics *drive_kinematics;
 
         MotorGroup left_motors;
         MotorGroup right_motors;
@@ -32,19 +32,19 @@ class DriveSubsystem : public Subsystem {
         Pose pose = {0_m, 0_m, 0_stDeg};
 
     public:
-        explicit DriveSubsystem(DifferentialKinematics *kinematics, MotorGroup &leftmotors, MotorGroup &rightmotors, 
+        explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu &inertial, TrackingWheel &tracker,
                                 const float deadband, const float minOutput, const float curve)
-        : drive_kinematics(kinematics), left_motors(leftmotors), right_motors(rightmotors),
+        : left_motors(leftmotors), right_motors(rightmotors),
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
             calibrateTracking();
         }
 
-        explicit DriveSubsystem(DifferentialKinematics *kinematics, MotorGroup &leftmotors, MotorGroup &rightmotors, 
+        explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu &inertial, TrackingWheel &tracker)
-        : drive_kinematics(kinematics), left_motors(leftmotors), right_motors(rightmotors),
+        : left_motors(leftmotors), right_motors(rightmotors),
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
             calibrateTracking();

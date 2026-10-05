@@ -1,7 +1,7 @@
 #include "trajectory/kinematics.hpp"
 #include "util.hpp"
 
-LinearVelocity DifferentialKinematics::getMaxSpeed(Path *path, Trajectory::State lastState, Length deltaD, Time t) const {
+LinearVelocity DifferentialKinematics::getMaxSpeed(Path *path, Trajectory::State lastState, Length deltaD, double t) const {
     auto derivative = path->getDerivative(t);
     auto secondDerivative = path->getSecondDerivative(t);
 
