@@ -12,6 +12,7 @@ class Ramsete : public Command {
 
         float zeta;
         float beta;
+        Pose poseTolerance;
 
         Time startTime = 0.0_msec;
 
@@ -22,9 +23,9 @@ class Ramsete : public Command {
         DriveVelocities lastVelocities{0_mps, 0_radps};
 
     public:
-        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory,
+        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory, Pose tolerance,
                 const float zeta = 0.0, const float beta = 0.0) :
-            drivetrain(drivetrain), trajectory(trajectory), zeta(zeta), beta(beta) {}
+            drivetrain(drivetrain), trajectory(trajectory), poseTolerance(tolerance), zeta(zeta), beta(beta) {}
 
         void initialize() override { startTime = from_msec(pros::millis()); printf("\nFollowing a trajectory with ramsete.\nFollowing Data:\n"); }
 
@@ -37,6 +38,7 @@ class Ramsete : public Command {
         DriveVelocities calculate(){
             const auto targetState = trajectory->sample(from_msec(pros::millis()) - startTime);
             auto currentPose = drivetrain->getPose();
+            // currentPose.orientation = 90_stDeg - currentPose.orientation;
             auto desiredPose = targetState.pose;
 
             const auto desiredOmega = targetState.angularVelocity;
@@ -72,13 +74,34 @@ class Ramsete : public Command {
                       << to_in(desiredPose.y) << "in, " 
                       << to_stDeg(desiredPose.orientation) << "deg )" <<
             std::endl;
+            std::cout << "Velocity Output: ( " 
+                      << v_output << ", "
+                      << omega_output << " )" <<
+            std::endl;
 
             return DriveVelocities{v_output, omega_output};
         }
 
         void end(bool interrupted) override { std::cout << "DONE" << std::endl; }
 
-        bool isFinished() override { return trajectory->totalTime() < from_msec(pros::millis()) - startTime; }
+        bool atReference() {
+            const auto& target = trajectory->sample(trajectory->totalTime()).pose;
+            const auto& current = drivetrain->getPose();
+            const auto& error = units::Pose(
+                                    target.x - current.x,
+                                    target.y - current.y,
+                                    target.orientation - current.orientation
+                                );
+            const auto& tolerance = poseTolerance;
+            return 
+                units::abs(error.x) < tolerance.x &&
+                units::abs(error.y) < tolerance.y &&
+                units::abs(error.orientation) < tolerance.orientation;
+        }
+
+        bool isFinished() override { 
+            return trajectory->totalTime() < from_msec(pros::millis()) - startTime && atReference(); 
+        }
 
         std::vector<Subsystem *> getRequirements() override { return {drivetrain}; }
 };

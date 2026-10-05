@@ -50,7 +50,7 @@ class LiftSubsystem : public Subsystem {
         }
 
         Length getTarget() {
-            return target.value();
+            return target.value_or(0_m);
         }
 
         /**

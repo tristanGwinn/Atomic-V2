@@ -18,8 +18,10 @@ namespace config {
 const int path_resolution = 100;    // this is the number of samples used for approximating path lengths
 
 // NEED TUNED
-constexpr double ramsete_beta = 2.0;
-constexpr double ramsete_zeta = 7.0;
+constexpr double ramsete_beta = 45.0;
+constexpr double ramsete_zeta = 0.4;
+
+constexpr units::Pose ramsete_tolerance(2_in, 2_in, 1.5_stDeg);
 
 inline PID angular_pid = PID(0, 0, 0, 0, false);    // these are just here until old motions are removed
 inline PID lateral_pid = PID(0, 0, 0, 0, false);
@@ -32,7 +34,7 @@ constexpr Length track_width = 11.50_in;
 constexpr Length wheel_diameter = 2.75_in;
 constexpr AngularVelocity max_rpm = 450 * rpm;
 
-constexpr LinearVelocity max_vel = 2_inps; // toLinear<AngularVelocity>(max_rpm, wheel_diameter);
+constexpr LinearVelocity max_vel = 5_inps; // toLinear<AngularVelocity>(max_rpm, wheel_diameter);
 constexpr LinearAcceleration max_accel = 3.40_mps2;     // max_accel = drivetrain force at max rpm / robot mass
 constexpr double friction_coefficient = 2.0;
 
