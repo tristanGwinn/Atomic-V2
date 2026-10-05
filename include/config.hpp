@@ -15,6 +15,8 @@
 
 namespace config {
 
+const int path_resolution = 100;    // this is the number of samples used for approximating path lengths
+
 // NEED TUNED
 constexpr double ramsete_beta = 2.0;
 constexpr double ramsete_zeta = 7.0;
@@ -30,12 +32,12 @@ constexpr Length track_width = 11.50_in;
 constexpr Length wheel_diameter = 2.75_in;
 constexpr AngularVelocity max_rpm = 450 * rpm;
 
-constexpr LinearVelocity max_vel = toLinear<AngularVelocity>(max_rpm, wheel_diameter);
+constexpr LinearVelocity max_vel = 2_inps; // toLinear<AngularVelocity>(max_rpm, wheel_diameter);
 constexpr LinearAcceleration max_accel = 3.40_mps2;     // max_accel = drivetrain force at max rpm / robot mass
 constexpr double friction_coefficient = 2.0;
 
-inline DifferentialKinematics robot_kinematics
-       = DifferentialKinematics (
+inline DifferentialKinematics *robot_kinematics
+       = new DifferentialKinematics (
                                     track_width,
                                     max_vel,
                                     max_accel,

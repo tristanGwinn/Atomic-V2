@@ -14,6 +14,12 @@
 
 #include "commands/score.h"
 #include "commands/resetArmLift.h"
+#include "commands/ramsete.h"
+
+#include "trajectory/trajectory.h"
+#include "trajectory/path.hpp"
+#include "trajectory/kinematics.hpp"
+#include "trajectory/trajectoryGenerator.hpp"
 
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
@@ -86,14 +92,6 @@ void initializeSubsystems(){
 
     resetArmLift = new ResetArmLift(lift, arm);
     scorePos1 = new Score(lift, arm, claw, {180.0, 6.0});
-
-
-    const auto move_to_score_command =
-        lift->positionCommand(6.0_in)
-            ->andThen(lift->holdPositionCommand())
-        ->with(arm->positionCommand(180)
-            ->andThen(arm->holdPositionCommand()));
-
 
     primary.getTrigger(DIGITAL_A)
         ->onTrue(

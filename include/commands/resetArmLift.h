@@ -11,11 +11,7 @@
 
 #include "subsystems/lift.h"
 #include "subsystems/arm.h"
-/**
- * this command will wait until the claw detects
- * an object, proceed to grab it, and then move the
- * arm (chain bar) and cascade lift to the desired position
- */
+
 class ResetArmLift : public Command {
     private:
         // subsystems
@@ -28,18 +24,19 @@ class ResetArmLift : public Command {
 
         void initialize() override {
             lift->setTarget(lift->getPosition() - 4_in);
-            arm->setTarget(10);
+
+            // dont move the arm unless needed
+            if (abs(arm->getPosition()) < 60.0 ) arm->brakeMotors(BrakeMode::COAST);
+            else arm->setTarget(10);
         }
 
-        // before writing this, move to position functionality to the cascade lift subsystem
         void execute() override {
-            lift->setTarget(lift->getPosition() - 4_in);
-            arm->setTarget(10);
+            // no-op
         }
 
         bool isFinished() override {
             return 
-                units::abs(lift->getPosition() - lift->getTarget()) < 1_in &&
+                abs(lift->getPosition() - lift->getTarget()) < 1_in &&
                 abs(arm->getPosition() - arm->getTarget()) < 20;
         }
 

@@ -1,29 +1,27 @@
 #include "trajectory/trajectoryGenerator.hpp"
 #include "units/Pose.hpp"
 #include "units/Angle.hpp"
+#include "config.hpp"
 
 #include <iostream>
 
-
-
-
 void TrajectoryGenerator::generateTrajectory(Path *path) {
-    Time t = 0_sec;
+    printf("Generating Trajectory ...\n");
+    double t = 0;   // REMEMBER: t is NOT time, it is a sum of percentages
 
     trajectoryStates.clear();
     trajectoryStates.push_back(Trajectory::State(
             0_sec, 0_mps, 0_rps,
-            units::Pose(path->getPoint(0_sec).x, path->getPoint(0_sec).y, 
-                units::atan2(path->getDerivative(0_sec).y, path->getDerivative(0_sec).x)
+            units::Pose(path->getPoint(0).x, path->getPoint(0).y, 
+                units::atan2(path->getDerivative(0).y, path->getDerivative(0).x)
             )   
         )    
     );
 
     Trajectory::State lastState = trajectoryStates.back();
 
-    // TODO: edit referenced classes to handle t as a time value
+    // while the summed percent of each path is less the number of paths, compute the first motion profiling pass
     while(t < path->GetMaxT()) {
-
         LinearVelocity maxSpeed = m_kinematics->getMaxSpeed(path, lastState, m_deltaD, t);
 
         auto derivative = path->getDerivative(t);
@@ -38,19 +36,19 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
             );
 
         lastState = Trajectory::State(
-            t, maxSpeed,
+            t*sec, maxSpeed,
             toAngularVelocity<LinearVelocity>(maxSpeed, curvature),
             units::Pose(path->getPoint(t).x, path->getPoint(t).y, 
                 units::atan2(path->getDerivative(t).y, path->getDerivative(t).x)
             )   
         );
 
-        // delta Time = delta Distance / Velocity
+        // this is an artifact from the original library
         Time dt = m_deltaD / units::sqrt(derivative.x * derivative.x + derivative.y * derivative.y);
 
         trajectoryStates.push_back(lastState);
 
-        t += dt;
+        t += dt.internal();
     }
 
     int i = trajectoryStates.size() - 1;
@@ -62,7 +60,8 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
         )   
     );
 
-    while (t > 0_sec) {
+    // iterate back through the trajectory, and compute the second profiling pass
+    while (t > 0) {
         trajectoryStates[i] = lastState.linearVelocity < trajectoryStates[i].linearVelocity
                         ? lastState
                         : trajectoryStates[i];
@@ -79,19 +78,41 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
             );
 
         lastState = Trajectory::State(
-            t, maxSpeed,
+            t*sec, maxSpeed,
             toAngularVelocity<LinearVelocity>(maxSpeed, curvature),
             units::Pose(path->getPoint(t).x, path->getPoint(t).y, 
                 units::atan2(path->getDerivative(t).y, path->getDerivative(t).x)
             )   
         );
 
+        // this is an artifact from the original library
         Time dt = m_deltaD / units::sqrt(derivative.x * derivative.x + derivative.y * derivative.y);
 
-        t -= dt;
+        t -= dt.internal();
         i--;
-  }
+    }
 
+    Time path_time = 0_sec;
+    lastState = trajectoryStates[0];
+    // Time parameterize the path
+    for (Trajectory::State state : trajectoryStates) {
+        // delta x = v_0 * t + ½a * t^2 → t = ( -v_0 ± sqrt( v_0^2 ) ) / a
+        // Ms. Korzan would be very proud if she saw this ^^
+
+        // v_f^2 = v_0^2 + 2 * a * delta_x → a = ( v_f^2 - v_0^2 ) / ( 2 * delta_x )
+        LinearAcceleration segmentAccel = 
+            ( units::square(state.linearVelocity) - units::square(lastState.linearVelocity) ) / 
+            ( 2 * state.pose.distanceTo(lastState.pose) );
+
+        LinearVelocity determinate = units::sqrt( units::square(lastState.linearVelocity) );
+        
+        path_time += units::max(determinate - lastState.linearVelocity, 
+                                -(determinate + lastState.linearVelocity) )
+                     / segmentAccel;
+
+        state.t = path_time;
+        lastState = state;
+    }
 }
 
 std::vector<Trajectory::State> TrajectoryGenerator::getTrajectory() { return trajectoryStates; }
