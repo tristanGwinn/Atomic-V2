@@ -23,6 +23,8 @@ constexpr double ramsete_zeta = 0.4;
 
 constexpr units::Pose ramsete_tolerance(2_in, 2_in, 1.5_stDeg);
 
+constexpr Time default_timeout = 3.0_sec;
+constexpr Length default_tolerance = 2_in;
 inline PID angular_pid = PID(0, 0, 0, 0, false);    // these are just here until old motions are removed
 inline PID lateral_pid = PID(0, 0, 0, 0, false);
 
@@ -34,8 +36,10 @@ constexpr Length track_width = 11.50_in;
 constexpr Length wheel_diameter = 2.75_in;
 constexpr AngularVelocity max_rpm = 450 * rpm;
 
-constexpr LinearVelocity max_vel = 5_inps; // toLinear<AngularVelocity>(max_rpm, wheel_diameter);
-constexpr LinearAcceleration max_accel = 3.40_mps2;     // max_accel = drivetrain force at max rpm / robot mass
+constexpr LinearVelocity max_vel = toLinear<AngularVelocity>(max_rpm, wheel_diameter);
+constexpr AngularVelocity max_angular_vel = toAngular<LinearVelocity>(max_vel, M_PI * track_width);
+
+constexpr LinearAcceleration max_accel = 2.76_mps2;     // max_accel = drivetrain force at max rpm / robot mass
 constexpr double friction_coefficient = 2.0;
 
 inline DifferentialKinematics *robot_kinematics

@@ -13,6 +13,7 @@ class Ramsete : public Command {
         float zeta;
         float beta;
         Pose poseTolerance;
+        // bool reversed = false;
 
         Time startTime = 0.0_msec;
 
@@ -23,9 +24,9 @@ class Ramsete : public Command {
         DriveVelocities lastVelocities{0_mps, 0_radps};
 
     public:
-        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory, Pose tolerance,
-                const float zeta = 0.0, const float beta = 0.0) :
-            drivetrain(drivetrain), trajectory(trajectory), poseTolerance(tolerance), zeta(zeta), beta(beta) {}
+        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory, Pose tolerance, // bool reversed = false,
+                const float zeta = config::ramsete_zeta, const float beta = config::ramsete_beta) :
+            drivetrain(drivetrain), trajectory(trajectory), poseTolerance(tolerance)/*, reversed(reversed)*/, zeta(zeta), beta(beta) {}
 
         void initialize() override { startTime = from_msec(pros::millis()); printf("\nFollowing a trajectory with ramsete.\nFollowing Data:\n"); }
 
@@ -79,7 +80,8 @@ class Ramsete : public Command {
                       << omega_output << " )" <<
             std::endl;
 
-            return DriveVelocities{v_output, omega_output};
+            return DriveVelocities{v_output, omega_output} ;
+            // return (reversed) ? DriveVelocities{-v_output, -omega_output} : DriveVelocities{v_output, omega_output} ;
         }
 
         void end(bool interrupted) override { std::cout << "DONE" << std::endl; }
