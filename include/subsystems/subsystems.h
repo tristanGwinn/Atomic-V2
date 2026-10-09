@@ -14,7 +14,9 @@
 
 #include "commands/score.h"
 #include "commands/resetArmLift.h"
+
 #include "commands/ramsete.h"
+#include "commands/rotate.h"
 
 #include "trajectory/trajectory.h"
 #include "trajectory/path.hpp"

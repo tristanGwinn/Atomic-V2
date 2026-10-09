@@ -48,6 +48,13 @@ class PID {
         Gains getGains() { return m_gains; }
 
         /**
+         * @brief get the target
+         *
+         * @return the target
+         */
+        Number getTarget() { return m_target; }
+
+        /**
          * @brief Set the new gains
          *
          * @param gains the new gains
@@ -139,6 +146,6 @@ class PID {
 
         Number m_previousError = 0;
         Number m_integral = 0;
-
+        
         std::optional<Time> m_previousTime = std::nullopt;
 };

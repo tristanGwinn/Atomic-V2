@@ -31,6 +31,8 @@ class DriveSubsystem : public Subsystem {
         bool track_odom = false;
         Pose pose = {0_m, 0_m, 0_stDeg};
 
+        std::optional<double> target_angle;
+
     public:
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
                                 pros::Imu &inertial, TrackingWheel &tracker,

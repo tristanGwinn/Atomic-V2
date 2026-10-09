@@ -65,6 +65,8 @@ void autonomous() {
 	// std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
 
     Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, 0.7, 1.0);
+	
+	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation, false))->schedule();
 	followTestTrajectory->schedule();
 }
 

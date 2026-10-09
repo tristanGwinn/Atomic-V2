@@ -25,6 +25,7 @@ constexpr units::Pose ramsete_tolerance(2_in, 2_in, 1.5_stDeg);
 
 constexpr Time default_timeout = 3.0_sec;
 constexpr Length default_tolerance = 2_in;
+constexpr Angle angle_tolerance = 2_stDeg;
 inline PID angular_pid = PID(0, 0, 0, 0, false);    // these are just here until old motions are removed
 inline PID lateral_pid = PID(0, 0, 0, 0, false);
 
