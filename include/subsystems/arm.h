@@ -54,7 +54,7 @@ class ArmSubsystem : public Subsystem {
                 // printf("arm position: %f \n", position);
                 // printf("arm error: %f \n", position.value() - target.value());
                 // printf("arm control output: %f \n", control_out.internal());
-                motor.move(control_out);
+                motor.move(control_out / 100);
             }
         }
 
@@ -101,15 +101,17 @@ class ArmSubsystem : public Subsystem {
             brakeMotors(BrakeMode::HOLD);
         }
 
-        FunctionalCommand *positionCommand(double angle, double threshold = 8.0) {
+        FunctionalCommand *positionCommand(double angle, double threshold = 3.0) {
             std::cout << "The arm target position is set to " << angle 
                       << "° with a tolerance of " << threshold << "°" << std::endl;
+        Time start_time = from_msec(pros::millis());
         return new FunctionalCommand(
             [this, angle]() { this->setTarget(angle);
-                                     }, [this, angle]() { this->setTarget(angle);
+                                     }, [this, angle]() { 
+                                         this->setTarget(angle);
                                      }, [this](bool _) {
                                          printf("The arm is within tolerence of its target.\n");
-                                         this->target = std::nullopt;
+                                         // this->target = std::nullopt;
                                      }, [this, threshold, angle]() {
                                          return abs(this->getPosition() - angle) < threshold;
                                      }, {this});

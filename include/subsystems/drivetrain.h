@@ -39,7 +39,10 @@ class DriveSubsystem : public Subsystem {
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker),
           deadband(deadband), minOutput(minOutput), curve(curve) 
         {
-            calibrateTracking();
+	        printf("calibrating odom position ...");
+	        this->calibrateTracking();
+	        printf("DONE");
+	        this->sendOdomDebug();
         }
 
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
@@ -47,7 +50,10 @@ class DriveSubsystem : public Subsystem {
         : left_motors(leftmotors), right_motors(rightmotors),
           imu(V5InertialSensor::from_pros_imu(inertial)), horizontal_tracker(tracker)
         {
-            calibrateTracking();
+	        printf("calibrating odom position ...");
+	        this->calibrateTracking();
+	        printf("DONE");
+	        this->sendOdomDebug();
         }
 
         void periodic() override {
@@ -105,7 +111,7 @@ class DriveSubsystem : public Subsystem {
             pose.x += magnitude * cos(rotate_theta);
             pose.y += magnitude * sin(rotate_theta);
 
-            pose.orientation = theta;   // set pose orientation to measured robot angle
+            pose.orientation = theta;   // set pose orientation to measured robot anlge
         }
 
         Length getLeftDelta() {
@@ -152,11 +158,15 @@ class DriveSubsystem : public Subsystem {
 
         void setDriveVelocities(DriveVelocities targets) {
             // side velocity = linear velocity +/- angular velocity * track_width/2
-            const auto leftSideVelocity = targets.v - toLinear<AngularVelocity>(targets.omega, config::track_width);
-            const auto rightSideVelocity = targets.v + toLinear<AngularVelocity>(targets.omega, config::track_width);
+            const LinearVelocity leftSideVelocity = targets.v - toLinear<AngularVelocity>(targets.omega, config::track_width);
+            const LinearVelocity rightSideVelocity = targets.v + toLinear<AngularVelocity>(targets.omega, config::track_width);
 
-            left_motors.move(leftSideVelocity / config::max_vel);
-            right_motors.move(rightSideVelocity / config::max_vel);
+            const double left_out = leftSideVelocity / config::max_vel;
+            const double right_out = rightSideVelocity / config::max_vel;
+            const double sum = abs(left_out) + abs(right_out);
+
+            left_motors.move( sum <= 1.0 ? left_out : left_out / sum );
+            right_motors.move( sum <= 1.0 ? right_out : right_out / sum );
         }
 
 

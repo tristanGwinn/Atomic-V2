@@ -39,7 +39,7 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
             t*sec, maxSpeed,
             toAngularVelocity<LinearVelocity>(maxSpeed, curvature),
             units::Pose(path->getPoint(t).x, path->getPoint(t).y, 
-                units::atan2(path->getDerivative(t).y, path->getDerivative(t).x)
+                units::atan2(path->getDerivative(t).y, path->getDerivative(t).x) - 90_stDeg
             )   
         );
 
@@ -56,7 +56,7 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
     lastState = Trajectory::State(
         0_sec, 0_mps, 0_rps, 
         units::Pose(path->getPoint(t).x, path->getPoint(t).y, 
-            units::atan2(path->getDerivative(t).y, path->getDerivative(t).x)
+            units::atan2(path->getDerivative(t).y, path->getDerivative(t).x) - 90_stDeg
         )   
     );
 
@@ -81,7 +81,7 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
             t*sec, maxSpeed,
             toAngularVelocity<LinearVelocity>(maxSpeed, curvature),
             units::Pose(path->getPoint(t).x, path->getPoint(t).y, 
-                units::atan2(path->getDerivative(t).y, path->getDerivative(t).x)
+                units::atan2(path->getDerivative(t).y, path->getDerivative(t).x) - 90_stDeg
             )   
         );
 
@@ -131,6 +131,7 @@ void TrajectoryGenerator::generateTrajectory(Path *path) {
                   << std::endl;
 
         trajectoryStates[i] = currentState;
+        trajectoryStates[i].pose.orientation = currentState.pose.orientation;
     }
 
     std::cout << "\nFinished generating the Trajectory.\n"

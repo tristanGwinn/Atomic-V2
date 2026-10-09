@@ -39,7 +39,10 @@ class LiftSubsystem : public Subsystem {
                 const auto control_out = pid.update(to_cm(position));
                 // printf("lift error: %f inches\n", to_in(position) - to_in(target.value()));
                 // printf("lift control output: %f \n", control_out.internal());
-                motor.move(control_out); 
+                motor.move(
+                    (units::sgn(control_out) == 1) ?
+                    units::clamp(control_out / 100, 0.6, 1) : units::clamp(control_out / 100, -0.5, 0)
+                ); 
             }
 
             prev_position = position;

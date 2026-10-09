@@ -1,8 +1,6 @@
 #include "deprecate/Timer.hpp"
 #include "pros/rtos.hpp"
 
-
-
 Timer::Timer(Time time)
     : m_period(time) {
     m_lastTime = pros::millis() * msec;

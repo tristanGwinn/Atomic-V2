@@ -60,7 +60,14 @@ Trajectory::State Trajectory::State::interpolate(State endValue,
         newS / endValue.pose.distanceTo(pose);
 
     return {newT, newV, newAngularV,
-            Lerp(pose, endValue.pose, interpolationFrac)};
+                units::Pose({
+                    pose.x + (endValue.pose.x - pose.x) * interpolationFrac,
+                    pose.y + (endValue.pose.y - pose.y) * interpolationFrac,
+                    pose.orientation + (endValue.pose.orientation - pose.orientation) * interpolationFrac
+                })
+            };
+        
+            //Lerp(pose, endValue.pose, interpolationFrac)};
 }
 
 Trajectory::Trajectory(const std::vector<State>& states) : m_states(states) {

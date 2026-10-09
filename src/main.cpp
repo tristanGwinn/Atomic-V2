@@ -50,11 +50,10 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-
     printf("testing Ramsete\n");
 
   	CubicBezier *testPath;
-  	testPath = new CubicBezier({0_in, 0_in}, {12_in, 12_in}, {0_in, 36_in}, {0_in, 48_in});
+  	testPath = new CubicBezier({0_in, 0_in}, {0_in, 6_in}, {36_in, 18_in}, {48_in, 36_in});
     printf("test path created\n");
 
   	TrajectoryGenerator generator(config::robot_kinematics, 0.5_in);

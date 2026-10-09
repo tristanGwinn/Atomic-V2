@@ -23,7 +23,7 @@
 
 CommandController primary(pros::E_CONTROLLER_MASTER);   // set the controller for command triggers
 
-MotorGroup left_motors({-10, -9}, 450_rpm);
+MotorGroup left_motors({-17, -9}, 450_rpm);
 MotorGroup right_motors({3, 1}, 450_rpm);
 pros::Imu imu(20);
 
@@ -36,11 +36,11 @@ TrackingWheel horizontal_tracker(
 MotorGroup lift_motors({-11, 21}, 600_rpm); // lift motors
 constexpr Length lift_winch_diameter = 20_mm;
 
-PID lift_pid(0.15, 0.0, 0.0, 0.0, false);
+PID lift_pid(9, 0.0, 0.0, 0.0, false);
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
-PID arm_pid(0.35, 0.0, 0.0, 0.0, false);
+PID arm_pid(1.5, 0.0, 0.0, 0.0, false);
 
 pros::adi::DigitalOut claw_solenoid('A');
 pros::Distance claw_distance(16);
@@ -91,7 +91,9 @@ void initializeSubsystems(){
     claw->levelCommand(true)->schedule();
 
     resetArmLift = new ResetArmLift(lift, arm);
-    scorePos1 = new Score(lift, arm, claw, {180.0, 6.0});
+    // scorePos1 = new Score(lift, arm, claw, {270.0, 0.0});
+    scorePos1 = new Score(lift, arm, claw, {255.0, 4.0});
+
 
     primary.getTrigger(DIGITAL_A)
         ->onTrue(
@@ -99,6 +101,12 @@ void initializeSubsystems(){
             ->andThen(claw->clampWhenReadyCommand())
             ->andThen(scorePos1)
             ->andThen(resetArmLift)
+        );
+
+    primary.getTrigger(DIGITAL_X)
+        ->onTrue(
+            lift->positionCommand(1.5_in, 1_in)
+            ->andThen(arm->positionCommand(280))
         );
 
     primary.getTrigger(DIGITAL_UP)
@@ -109,7 +117,7 @@ void initializeSubsystems(){
 
     primary.getTrigger(DIGITAL_LEFT)
         ->onTrue(
-                lift->positionCommand(10_in)
+                lift->positionCommand(6_in)
                     ->andThen(lift->holdPositionCommand())
             );
 
