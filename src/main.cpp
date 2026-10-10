@@ -28,7 +28,7 @@
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
-bool logoOnBrain = true;
+bool logoOnBrain = false;
 
 void initialize() {
 	if (logoOnBrain){
@@ -64,9 +64,9 @@ void autonomous() {
 	auto pathTrajectory = new Trajectory(generator.getTrajectory());
 	// std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
 
-    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, 0.7, 1.0);
+    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, true, 0.7, 1.0);
 	
-	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation, false))->schedule();
+	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation + 180_stDeg, false))->schedule();
 	followTestTrajectory->schedule();
 }
 

@@ -26,7 +26,7 @@ public:
 	/**
 	 * @brief Initializes the WaitCommand and sets the start time of the WaitCommand
 	 */
-	void initialize() override {}
+	void initialize() override { std::cout << "Waiting for " << duration << " ..." << std::endl; }
 
 	/**
 	 * @brief Returns when the WaitCommand's duration has passed
@@ -34,6 +34,7 @@ public:
 	 * @return Returns true if the duration has passed, false otherwise
 	 */
 	bool isFinished() override {
+		std::cout << "DONE WAITING" << std::endl;
 		return pros::millis() * msec - startTime > duration;
 	}
 

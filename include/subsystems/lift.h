@@ -8,7 +8,7 @@
 // This is a subsystem class for the cascade lift
 class LiftSubsystem : public Subsystem {
     private:
-        const Length max_lift_height = 12.0_in;
+        const Length max_lift_height = 16.5_in;
 
         MotorGroup motor;
         
@@ -82,21 +82,6 @@ class LiftSubsystem : public Subsystem {
         void stopAndHold() {
             brakeMotors(BrakeMode::HOLD);
         }
-
-        // this function is pretty much useless
-        /*bool checkWinchStatus(double voltage){
-            // if the motor is reversed and is not moving, the winch is likely wound up
-            if(voltage < 0 && prev_position == position)
-                return true;
-            else
-                return false;
-        }*/
-
-        // void moveToBottom() {
-        //     // if (!isWinchWound) this->setPct(-0.25);  // im dumb we dont need this
-        //     brakeMotors(BrakeMode::COAST);
-        // }
-
 
         FunctionalCommand *positionCommand(Length height, Length threshold = 2.3_cm) {
             std::cout << "The lift target position is set to " << height 

@@ -11,40 +11,43 @@
 
 #include "subsystems/lift.h"
 #include "subsystems/arm.h"
+#include "subsystems/claw.h"
 
 class ResetArmLift : public Command {
     private:
         // subsystems
         LiftSubsystem *lift;
         ArmSubsystem *arm;
+        ClawSubsystem *claw;
 
     public:
-        ResetArmLift(LiftSubsystem *lift, ArmSubsystem *arm)
-        : lift(lift), arm(arm) {}
+        ResetArmLift(LiftSubsystem *lift, ArmSubsystem *arm, ClawSubsystem* claw)
+        : lift(lift), arm(arm), claw(claw) {}
 
         void initialize() override {
             printf("Resetting the Arm and Lift positions ...\n");
+            claw->setLevel(true);
             lift->setTarget(lift->getPosition() - 4_in);
-
-            // dont move the arm unless needed
-            if (abs(arm->getPosition()) < 60.0 ) arm->brakeMotors(BrakeMode::COAST);
-            else arm->setTarget(10);
+            arm->setTarget(0);
         }
 
         void execute() override {
             // no-op
+            if ((arm->getPosition() - arm->getTarget()) < 100)
+                arm->setPct(-0.2);
         }
 
         bool isFinished() override {
             return 
                 abs(lift->getPosition() - lift->getTarget()) < 1_in &&
-                (arm->getTarget() == -1) ? true : abs(arm->getPosition() - arm->getTarget()) < 20;
+                (arm->getTarget() == -1) ? true : abs(arm->getPosition() - arm->getTarget()) < 3.0;
         }
 
         void end(bool interupted) override {
             lift->brakeMotors(BrakeMode::COAST);
             arm->brakeMotors(BrakeMode::COAST);
             printf("DONE\n");
+            claw->setLevel(false);
         }
 
         std::vector<Subsystem *> getRequirements() override { return {lift, arm}; }
