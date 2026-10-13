@@ -22,11 +22,8 @@ class Score : public Command {
         // subsystems
         LiftSubsystem *lift;
         ArmSubsystem *arm;
-<<<<<<< HEAD
+        ClawSubsystem *claw;
         
-=======
-
->>>>>>> a382598 (Updated logo and driver controls.)
         // Score positions for the arm and lift
         // angle (degrees), height (inches)
         std::array<double, 2> score_positions;  // it might be better to make this a struct or some other data type
