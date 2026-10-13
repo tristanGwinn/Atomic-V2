@@ -41,7 +41,7 @@ class ArmSubsystem : public Subsystem {
         }
 
         void periodic() override {
-            position = this->getPosition() - pos_offset.value_or(0);
+            position = this->getPosition();
             
             // this is a really gross way to do this, but wtv
             if (!pos_offset.has_value() && (fabs(position - prev_position) < max_init_delta && position > 26.0)) {
@@ -54,7 +54,8 @@ class ArmSubsystem : public Subsystem {
                 // printf("arm position: %f \n", position);
                 // printf("arm error: %f \n", position.value() - target.value());
                 // printf("arm control output: %f \n", control_out.internal());
-                motor.move(control_out / 100);
+                if (position - pos_offset.value_or(0) > 185 && target.value() - pos_offset.value_or(0) > 180) motor.move( clamp(control_out / 100, -0.2, 0.2) );
+                else motor.move( clamp(control_out / 100, -0.8, 0.8) );
             }
         }
 
@@ -65,7 +66,9 @@ class ArmSubsystem : public Subsystem {
             // convert the roll into a rotation value (where 180 is the facing up)
             auto pos = (arm_roll < 0) ?
                         360 + arm_roll : arm_roll; 
-            return pos;    
+
+            // std::cout << pos - pos_offset.value_or(0) << std::endl;
+            return pos - pos_offset.value_or(0);    
         }
 
         double getTarget() {

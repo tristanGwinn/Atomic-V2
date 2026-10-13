@@ -13,7 +13,7 @@ class Ramsete : public Command {
         float zeta;
         float beta;
         Pose poseTolerance;
-        // bool reversed = false;
+        bool reversed = false;
 
         Time startTime = 0.0_msec;
 
@@ -24,9 +24,9 @@ class Ramsete : public Command {
         DriveVelocities lastVelocities{0_mps, 0_radps};
 
     public:
-        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory, Pose tolerance, // bool reversed = false,
+        Ramsete(DriveSubsystem *drivetrain, Trajectory *trajectory, Pose tolerance, bool reversed = false,
                 const float zeta = config::ramsete_zeta, const float beta = config::ramsete_beta) :
-            drivetrain(drivetrain), trajectory(trajectory), poseTolerance(tolerance)/*, reversed(reversed)*/, zeta(zeta), beta(beta) {}
+            drivetrain(drivetrain), trajectory(trajectory), poseTolerance(tolerance), reversed(reversed), zeta(zeta), beta(beta) {}
 
         void initialize() override { startTime = from_msec(pros::millis()); printf("\nFollowing a trajectory with ramsete.\nFollowing Data:\n"); }
 
@@ -39,11 +39,11 @@ class Ramsete : public Command {
         DriveVelocities calculate(){
             const auto targetState = trajectory->sample(from_msec(pros::millis()) - startTime);
             auto currentPose = drivetrain->getPose();
-            // currentPose.orientation = 90_stDeg - currentPose.orientation;
             auto desiredPose = targetState.pose;
-
-            const auto desiredOmega = targetState.angularVelocity;
-            const auto desiredV = targetState.linearVelocity;
+            
+            if(reversed) desiredPose.orientation += 180_stDeg;
+            const auto desiredOmega = reversed ? -targetState.angularVelocity : targetState.angularVelocity;
+            const auto desiredV = reversed ? -targetState.linearVelocity : targetState.linearVelocity;
 
             const auto poseError = units::Pose(
                         desiredPose.x - currentPose.x,

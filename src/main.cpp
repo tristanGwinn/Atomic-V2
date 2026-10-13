@@ -50,13 +50,22 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-    printf("testing Ramsete\n");
+
+	auto turningTest = new Sequence({
+		(new Rotate(drivetrain, 90_stDeg, false, 0.0, false))->withTimeout(3_sec),
+		(new Rotate(drivetrain, 0_stDeg, false, 0.0, false))->withTimeout(3_sec),
+		(new Rotate(drivetrain, 180_stDeg, false, 0.0, false))->withTimeout(3_sec)
+	});
+
+	turningTest->schedule();
+
+	/*printf("testing Ramsete\n");
 
   	CubicBezier *testPath;
   	testPath = new CubicBezier({0_in, 0_in}, {0_in, 6_in}, {36_in, 18_in}, {48_in, 36_in});
     printf("test path created\n");
 
-  	TrajectoryGenerator generator(config::robot_kinematics, 0.5_in);
+  	TrajectoryGenerator generator(config::robot_kinematics, 0.7_in);
     printf("generator created\n");
 
   	generator.generateTrajectory(testPath);
@@ -67,7 +76,7 @@ void autonomous() {
     Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, 0.7, 1.0);
 	
 	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation, false))->schedule();
-	followTestTrajectory->schedule();
+	followTestTrajectory->schedule();*/
 }
 
 void opcontrol() {}

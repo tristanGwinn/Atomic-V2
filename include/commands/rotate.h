@@ -45,8 +45,10 @@ public:
     }
 
     bool isFinished() override {
-        return finish && this->drivetrain->getPose().orientation - config::angular_pid.getTarget()*rad <
-               config::angle_tolerance;
+        return (
+            finish && 
+            abs(this->drivetrain->getPose().orientation - config::angular_pid.getTarget()*rad) < config::angle_tolerance
+        );
     }
 
     std::vector<Subsystem *> getRequirements() override {

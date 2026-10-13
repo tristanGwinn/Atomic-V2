@@ -24,7 +24,7 @@ class Score : public Command {
         ArmSubsystem *arm;
         ClawSubsystem *claw;
 
-        u_int steps = 3;
+        u_int steps = 1;
         
         // Score positions for the arm and lift
         // angle (degrees), height (inches)
@@ -44,54 +44,19 @@ class Score : public Command {
 
 
         // before writing this, move to position functionality to the cascade lift subsystem
-        void execute() override {
-
-            switch(steps) {
-                case 3:
-                    if (arePositionsTolerable()){   // stop arm and lift movements if they are settled
-                        lift->brakeMotors(BrakeMode::HOLD);
-                        arm->brakeMotors(BrakeMode::HOLD);
-                        steps--;    // decrease step counter
-
-                        printf("The arm and lift are both in scoring position!\n");
-                    }
-                    break;
-
-                case 2:
-                    claw->setLevel(false);  // open claw
-                    lift->setTarget(lift->getPosition() + 2_in);   // raise lift to avoid jamming
-                    steps--;    // decrease step counter
-
-                    printf("Raising lift to avoid jamming ...\n");
-                    break;
-
-                case 1:
-                    if( abs(lift->getPosition() - lift->getTarget()) < 2.3_cm ) {
-                        // stop lift once raised
-                        lift->brakeMotors(BrakeMode::HOLD);
-                        steps--;    // decrease step counter
-
-                        printf("The lift has been raised!\n");
-                    }
-                    break;
-
-                default:    // this should never happen
-                    printf("Scoring error, exiting command\n");
-                    steps = 0;
-                
-            }
-
-        }
+        void execute() override { }
 
         bool arePositionsTolerable() {
-            return
-                abs(lift->getPosition() - lift->getTarget()) < 2.3_cm && 
-                abs(arm->getPosition() - arm->getTarget()) < 8.0;
+            return (
+                (abs(lift->getPosition() - lift->getTarget()) < 2.5_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
+            );
         }
 
-        bool isFinished() override { return steps == 0;}
+        bool isFinished() override { return arePositionsTolerable(); }
 
         void end(bool interupted) override { 
+            lift->brakeMotors(BrakeMode::HOLD);
+            arm->brakeMotors(BrakeMode::HOLD);
             std::cout << "Score command finished!\n" << std::endl;    
         }
 
