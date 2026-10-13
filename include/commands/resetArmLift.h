@@ -33,14 +33,15 @@ class ResetArmLift : public Command {
 
         void execute() override {
             // no-op
-            if ((arm->getPosition() - arm->getTarget()) < 100)
-                arm->setPct(-0.2);
+            if ((arm->getPosition() - arm->getTarget()) < 60)
+                arm->setPct(-0.1);
         }
 
         bool isFinished() override {
-            return 
-                abs(lift->getPosition() - lift->getTarget()) < 1_in &&
-                (arm->getTarget() == -1) ? true : abs(arm->getPosition() - arm->getTarget()) < 3.0;
+            return (
+                abs(lift->getPosition() - lift->getTarget()) < 2_in &&
+                (arm->getTarget() == -1) ? true : abs(arm->getPosition() - arm->getTarget()) < 8.0
+            );
         }
 
         void end(bool interupted) override {
