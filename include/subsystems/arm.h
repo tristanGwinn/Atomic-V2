@@ -59,8 +59,8 @@ class ArmSubsystem : public Subsystem {
                 printf("arm position: %f \n", position);
                 // printf("arm error: %f \n", position.value() - target.value());
                 // printf("arm control output: %f \n", control_out.internal());
-                // if (position - pos_offset.value_or(0) > 185 && target.value() - pos_offset.value_or(0) > 180) motor.move( clamp(control_out / 100, -0.2, 0.2) );
-                // else motor.move( clamp(control_out / 100, -0.8, 0.8) );
+                if (position - pos_offset.value_or(0) > 185 && target.value() - pos_offset.value_or(0) > 180) motor.move( clamp(control_out / 100, -0.2, 0.2) );
+                else motor.move( clamp(control_out / 100, -0.8, 0.8) );
             }
         }
 

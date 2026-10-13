@@ -20,23 +20,19 @@ class ResetArmLift : public Command {
         ArmSubsystem *arm;
         ClawSubsystem *claw;
 
-        Number initial_arm_pos = 0;
-
     public:
         ResetArmLift(LiftSubsystem *lift, ArmSubsystem *arm, ClawSubsystem* claw)
         : lift(lift), arm(arm), claw(claw) {}
 
         void initialize() override {
             printf("Resetting the Arm and Lift positions ...\n");
-            if(arm->getPosition() < 100) lift->setTarget(lift->getPosition() - 4_in);
+            claw->setLevel(true);
+            lift->setTarget(lift->getPosition() - 4_in);
             arm->setTarget(0);
-            initial_arm_pos = arm->getPosition();
         }
 
         void execute() override {
             // no-op
-            if(arm->getPosition() < 160) lift->setTarget(lift->getPosition() - 4_in);
-
             if ((arm->getPosition() - arm->getTarget()) < 60)
                 arm->setPct(-0.1);
         }
