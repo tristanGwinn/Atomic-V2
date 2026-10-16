@@ -44,15 +44,15 @@ class Score : public Command {
 
         bool arePositionsTolerable() {
             return (
-                (abs(lift->getPosition() - lift->getTarget()) < 3.0_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
+                (abs(lift->getPosition() - lift->getTarget()) < 3.0_cm) && (abs(arm->getPosition() - arm->getTarget()) < 3.0)
             );
         }
 
         bool isFinished() override { return arePositionsTolerable(); }
 
         void end(bool interupted) override { 
-            lift->brakeMotors(BrakeMode::BRAKE);
-            arm->brakeMotors(BrakeMode::BRAKE);
+            lift->brakeMotors(BrakeMode::HOLD);
+            arm->brakeMotors(BrakeMode::HOLD);
             std::cout << "Score command finished!\n" << std::endl;    
         }
 
