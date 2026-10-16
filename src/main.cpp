@@ -77,13 +77,8 @@ void autonomous() {
 
     Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, true, 0.7, 1.0);
 	
-<<<<<<< HEAD
-	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation + 180_stDeg, false))->schedule();
-	followTestTrajectory->schedule();
-=======
 	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation, false))->schedule();
 	followTestTrajectory->schedule();*/
->>>>>>> 5348390 (It all seems to be working!!)
 }
 
 void opcontrol() {}
