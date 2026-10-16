@@ -57,8 +57,6 @@ ClawSubsystem *claw;
 
 ResetArmLift *resetArmLift;
 
-Score *scorePosT;
-
 Score *scorePos0;
 Score *scorePos1;
 Score *scorePos2;
@@ -101,30 +99,18 @@ void initializeSubsystems(){
 
     resetArmLift = new ResetArmLift(lift, arm, claw);
 
-    //scorePos0 = new Score(lift, arm, {180.0, 0.0});
-    scorePosT = new Score(lift, arm, {180.0, 0.0});
-
-    scorePos0 = new Score(lift, arm, {277.0, 1.5});
-    scorePos1 = new Score(lift, arm, {287.0, 6.0});
-    scorePos2 = new Score(lift, arm, {173.0, 2.8});
+    scorePos0 = new Score(lift, arm, {242.0, 2.0});
+    scorePos1 = new Score(lift, arm, {240.0, 6.0});
+    scorePos2 = new Score(lift, arm, {171.0, 2.8});
     scorePos3 = new Score(lift, arm, {178.0, 6.0});
     // scorePos4 = new Score(lift, arm, claw, {171.0, 11.2});
-
-    primary.getTrigger(DIGITAL_UP)
-    ->andOther(primary.getTrigger(DIGITAL_B)->negate())
-        ->toggleOnFalse(
-            claw->levelCommand(true)
-            ->andThen(scorePosT)
-            ->andThen(arm->holdPositionCommand()->with(lift->holdPositionCommand()))
-            ->andThen(new WaitCommand(250_msec))
-        );
 
     primary.getTrigger(DIGITAL_B)
         ->onTrue(resetArmLift);
 
     primary.getTrigger(DIGITAL_RIGHT)
         ->toggleOnFalse(
-            arm->positionCommand(18.65, 0.5)
+            arm->positionCommand(18.0, 0.5)
             ->andThen(arm->holdPositionCommand())
             ->andThen(claw->levelCommand(false))
         );
@@ -141,7 +127,9 @@ void initializeSubsystems(){
     primary.getTrigger(DIGITAL_DOWN)
         ->toggleOnTrue(
             claw->levelCommand(false)
-                ->andThen(new Score(lift, arm, {arm->getPosition(), to_in(lift->getPosition())}))->andThen(new WaitCommand(50_msec))
+                ->andThen(new WaitCommand(1.5_sec))
+            ->andThen(arm->positionCommand(200, 10))
+                ->andThen(new WaitCommand(100_msec))
             ->andThen(claw->levelCommand(true))
                 ->andThen(new WaitCommand(100_msec))
             ->andThen(resetArmLift)
