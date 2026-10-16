@@ -22,10 +22,7 @@ class Score : public Command {
         // subsystems
         LiftSubsystem *lift;
         ArmSubsystem *arm;
-        ClawSubsystem *claw;
 
-        u_int steps = 1;
-        
         // Score positions for the arm and lift
         // angle (degrees), height (inches)
         std::array<double, 2> score_positions;  // it might be better to make this a struct or some other data type
@@ -33,8 +30,8 @@ class Score : public Command {
         // maybe a bool or enum to determine order of arm and lift movement
         // may also want to motion profile or smth; problem for future me
     public:
-        Score(LiftSubsystem *lift, ArmSubsystem *arm, ClawSubsystem *claw, std::array<double, 2> positions)
-        : lift(lift), arm(arm), claw(claw), score_positions(std::move(positions)) {}
+        Score(LiftSubsystem *lift, ArmSubsystem *arm, std::array<double, 2> positions)
+        : lift(lift), arm(arm), score_positions(std::move(positions)) {}
 
         void initialize() override {
             lift->setTarget(from_in(score_positions[1]));
@@ -48,19 +45,19 @@ class Score : public Command {
 
         bool arePositionsTolerable() {
             return (
-                (abs(lift->getPosition() - lift->getTarget()) < 2.5_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
+                (abs(lift->getPosition() - lift->getTarget()) < 3.0_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
             );
         }
 
         bool isFinished() override { return arePositionsTolerable(); }
 
         void end(bool interupted) override { 
-            lift->brakeMotors(BrakeMode::HOLD);
-            arm->brakeMotors(BrakeMode::HOLD);
+            lift->brakeMotors(BrakeMode::BRAKE);
+            arm->brakeMotors(BrakeMode::BRAKE);
             std::cout << "Score command finished!\n" << std::endl;    
         }
 
-        std::vector<Subsystem *> getRequirements() override { return {lift, arm, claw}; }
+        std::vector<Subsystem *> getRequirements() override { return {lift, arm}; }
 
         ~Score() override = default;
 };
