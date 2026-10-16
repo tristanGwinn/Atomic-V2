@@ -22,7 +22,11 @@ class Score : public Command {
         // subsystems
         LiftSubsystem *lift;
         ArmSubsystem *arm;
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> a382598 (Updated logo and driver controls.)
         // Score positions for the arm and lift
         // angle (degrees), height (inches)
         std::array<double, 2> score_positions;  // it might be better to make this a struct or some other data type
@@ -45,15 +49,15 @@ class Score : public Command {
 
         bool arePositionsTolerable() {
             return (
-                (abs(lift->getPosition() - lift->getTarget()) < 2.5_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
+                (abs(lift->getPosition() - lift->getTarget()) < 3.0_cm) && (abs(arm->getPosition() - arm->getTarget()) < 8.0)
             );
         }
 
         bool isFinished() override { return arePositionsTolerable(); }
 
         void end(bool interupted) override { 
-            lift->brakeMotors(BrakeMode::HOLD);
-            arm->brakeMotors(BrakeMode::HOLD);
+            lift->brakeMotors(BrakeMode::BRAKE);
+            arm->brakeMotors(BrakeMode::BRAKE);
             std::cout << "Score command finished!\n" << std::endl;    
         }
 
