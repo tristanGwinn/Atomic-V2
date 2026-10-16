@@ -8,7 +8,7 @@
 // This is a subsystem class for the cascade lift
 class LiftSubsystem : public Subsystem {
     private:
-        const Length max_lift_height = 16.5_in;
+        const Length max_lift_height = 22.0_in;
 
         MotorGroup motor;
         

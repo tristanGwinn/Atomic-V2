@@ -7,6 +7,8 @@
 #include "command/sequence.h"
 #include "command/commandController.h"
 
+#include "subsystems/solenoidSubsystem.h"
+
 #include "subsystems/lift.h"
 #include "subsystems/drivetrain.h"
 #include "subsystems/arm.h"
@@ -42,7 +44,7 @@ PID lift_pid(9, 0.0, 0.0, 0.0, false);
 
 MotorGroup arm_motors({6, -4}, 600_rpm);
 pros::Imu arm_imu(8);
-PID arm_pid(1.5, 0.0, 0.0, 0.0, false);
+PID arm_pid(1.4, 0.0, 0.0, 0.0, false);
 
 pros::adi::DigitalOut claw_solenoid('A');
 pros::Distance claw_distance(16);
@@ -53,18 +55,13 @@ DriveSubsystem *drivetrain;
 ArmSubsystem *arm;
 ClawSubsystem *claw;
 
-<<<<<<< HEAD
-=======
 ResetArmLift *resetArmLift;
 
+Score *scorePos0;
 Score *scorePos1;
 Score *scorePos2;
 Score *scorePos3;
-Score *scorePos4;
-Score *scorePos5;
-Score *scorePos6;
 
->>>>>>> 5348390 (It all seems to be working!!)
 /**
  * @brief This function runs the update scheduler at each frame with a consistent schedule
  *
@@ -96,7 +93,9 @@ void initializeSubsystems(){
     CommandScheduler::registerSubsystem(drivetrain, drivetrain->arcade(primary));
     CommandScheduler::registerSubsystem(lift, lift->dropLiftCommand()); 
     CommandScheduler::registerSubsystem(arm, arm->dropArmCommand());
-    CommandScheduler::registerSubsystem(claw, claw->levelCommand(false));
+    CommandScheduler::registerSubsystem(claw, claw->maintainCommand());
+    
+    // claw->levelCommand(false)->schedule();
 
 <<<<<<< HEAD
     ResetArmLift* resetArmLift = new ResetArmLift(lift, arm, claw);
@@ -108,15 +107,46 @@ void initializeSubsystems(){
 =======
     resetArmLift = new ResetArmLift(lift, arm, claw);
 
-    scorePos1 = new Score(lift, arm, claw, {255.0, 3.0});
-    scorePos2 = new Score(lift, arm, claw, {176.0, 3.0});
-    scorePos3 = new Score(lift, arm, claw, {178.0, 9.0});
-    scorePos4 = new Score(lift, arm, claw, {90.0, 10.0});
-    scorePos5 = new Score(lift, arm, claw, {178.0, 9.0});
-    scorePos6 = new Score(lift, arm, claw, {178.0, 9.0});
+    scorePos0 = new Score(lift, arm, {242.0, 2.0});
+    scorePos1 = new Score(lift, arm, {240.0, 6.0});
+    scorePos2 = new Score(lift, arm, {171.0, 2.8});
+    scorePos3 = new Score(lift, arm, {178.0, 6.0});
+    // scorePos4 = new Score(lift, arm, claw, {171.0, 11.2});
+
+    primary.getTrigger(DIGITAL_B)
+        ->onTrue(resetArmLift);
+
+    primary.getTrigger(DIGITAL_RIGHT)
+        ->toggleOnFalse(
+            arm->positionCommand(18.0, 0.5)
+            ->andThen(arm->holdPositionCommand())
+            ->andThen(claw->levelCommand(false))
+        );
+
+    primary.getTrigger(DIGITAL_Y)
+        ->toggleOnTrue(
+            claw->levelCommand(true)->andThen(new WaitCommand(250_msec))
+        )
+        ->toggleOnFalse(
+            arm->positionCommand(25, 1.0)
+            ->andThen(arm->holdPositionCommand())
+        );
+
+    primary.getTrigger(DIGITAL_DOWN)
+        ->toggleOnTrue(
+            claw->levelCommand(false)
+                ->andThen(new WaitCommand(1.5_sec))
+            ->andThen(arm->positionCommand(200, 10))
+                ->andThen(new WaitCommand(100_msec))
+            ->andThen(claw->levelCommand(true))
+                ->andThen(new WaitCommand(100_msec))
+            ->andThen(resetArmLift)
+                ->andThen(new WaitCommand(150_msec))
+        );
 
     primary.getTrigger(DIGITAL_R1)
     ->andOther(primary.getTrigger(DIGITAL_B)->negate())
+<<<<<<< HEAD
     ->andOther(primary.getTrigger(DIGITAL_L1)->negate())
 >>>>>>> 5348390 (It all seems to be working!!)
         ->onTrue(
@@ -143,40 +173,43 @@ void initializeSubsystems(){
                 ->andThen(lift->holdPositionCommand())
                 ->andThen(claw->levelCommand(true))
                     ->andThen(new WaitCommand(1_sec))
+=======
+        ->toggleOnFalse(
+            claw->levelCommand(true)
+            ->andThen(scorePos0)
+            ->andThen(arm->holdPositionCommand()->with(lift->holdPositionCommand()))
+            ->andThen(new WaitCommand(250_msec))
+>>>>>>> a382598 (Updated logo and driver controls.)
         );
 
     primary.getTrigger(DIGITAL_R2)
     ->andOther(primary.getTrigger(DIGITAL_B)->negate())
-    ->andOther(primary.getTrigger(DIGITAL_L1)->negate())
-        ->onTrue(
-            resetArmLift
-            ->andThen(claw->clampWhenReadyCommand())->andThen(new WaitCommand(500_msec))
-            ->andThen(scorePos2)
-                    ->andThen(new WaitCommand(1_sec))
-                ->andThen(claw->levelCommand(false))
-                    ->andThen(new WaitCommand(1_sec))
-                ->andThen(lift->positionCommand(16.5_in, 3.2_cm))
-                ->andThen(lift->holdPositionCommand())
-                ->andThen(claw->levelCommand(true))
-                    ->andThen(new WaitCommand(1_sec))
-        );
-    
-    primary.getTrigger(DIGITAL_L2)
-    ->andOther(primary.getTrigger(DIGITAL_B)->negate())
-    ->andOther(primary.getTrigger(DIGITAL_L1)->negate())
-        ->onTrue(
-            resetArmLift
-            ->andThen(claw->clampWhenReadyCommand())->andThen(new WaitCommand(500_msec))
-            ->andThen(scorePos3)
-                    ->andThen(new WaitCommand(1_sec))
-                ->andThen(claw->levelCommand(false))
-                    ->andThen(new WaitCommand(1_sec))
-                ->andThen(lift->positionCommand(16.5_in, 3.2_cm))
-                ->andThen(lift->holdPositionCommand())
-                ->andThen(claw->levelCommand(true))
-                    ->andThen(new WaitCommand(1_sec))
+        ->toggleOnFalse(
+            claw->levelCommand(true)
+            ->andThen(scorePos1)
+            ->andThen(arm->holdPositionCommand()->with(lift->holdPositionCommand()))
+            ->andThen(new WaitCommand(250_msec))
         );
 
+    primary.getTrigger(DIGITAL_L1)
+    ->andOther(primary.getTrigger(DIGITAL_B)->negate())
+        ->toggleOnFalse(
+            claw->levelCommand(true)
+            ->andThen(scorePos2)
+            ->andThen(arm->holdPositionCommand()->with(lift->holdPositionCommand()))
+            ->andThen(new WaitCommand(250_msec))
+        );
+        
+    primary.getTrigger(DIGITAL_L2)
+    ->andOther(primary.getTrigger(DIGITAL_B)->negate())
+        ->toggleOnFalse(
+            claw->levelCommand(true)
+            ->andThen(scorePos3)->andThen(new WaitCommand(50_msec))
+            ->andThen(lift->holdPositionCommand())//->andThen(arm->holdPositionCommand())
+            ->andThen(new WaitCommand(250_msec))
+        );
+
+<<<<<<< HEAD
     primary.getTrigger(DIGITAL_UP)
         ->onTrue(
             (arm->positionCommand(180.0))
@@ -200,5 +233,9 @@ void initializeSubsystems(){
     
     primary.getTrigger(DIGITAL_Y)->onTrue( claw->levelCommand(!claw->getClampStatus()) );
     
+=======
+    resetArmLift->schedule();
+
+>>>>>>> a382598 (Updated logo and driver controls.)
     printf("\nSubsystems have been set up!\n\n");
 }

@@ -43,6 +43,8 @@ void initialize() {
     // setup and register subsystems and setup triggers
     initializeSubsystems();
 
+	primary.rumble("...-");
+
 }
 
 void disabled() {}
