@@ -46,7 +46,7 @@ PID lift_pid(9, 0.0, 0.0, 0.0, false);
 MotorGroup arm_motors({6, -4}, 200_rpm);
 pros::Imu arm_imu(8);
 // PID arm_pid(1.97, 0.0, 0.28, 0.0, false);
-PID arm_pid(2.0, 0.0, 0.2, 0.0, false);
+PID arm_pid(1.88, 0.0, 0.15, 0.0, false);
 
 pros::adi::DigitalOut claw_solenoid('A');
 pros::Distance claw_distance(16);
@@ -107,18 +107,16 @@ void initializeSubsystems(){
     CommandScheduler::registerSubsystem(arm, arm->dropArmCommand());
     CommandScheduler::registerSubsystem(claw, claw->maintainCommand());
     CommandScheduler::registerSubsystem(toggleFlippers, toggleFlippers->levelCommand(true));
-    
-    // claw->levelCommand(false)->schedule();
 
     resetArmLift = new ResetArmLift(lift, arm, claw);
 
     //scorePos0 = new Score(lift, arm, {180.0, 0.0});
     scorePosT = new Score(lift, arm, {180.0, 0.0});
 
-    scorePos0 = new Score(lift, arm, {275.5, 1.5});
-    scorePos1 = new Score(lift, arm, {286.0, 6.5});
-    scorePos2 = new Score(lift, arm, {173.0, 2.8});
-    scorePos3 = new Score(lift, arm, {178.0, 6.0});
+    scorePos0 = new Score(lift, arm, {275.1, 1.5});
+    scorePos1 = new Score(lift, arm, {290.8, 7.45});
+    scorePos2 = new Score(lift, arm, {174.4, 2.15});
+    scorePos3 = new Score(lift, arm, {182.1, 7.83});
     // scorePos4 = new Score(lift, arm, claw, {171.0, 11.2});
 
     primary.getTrigger(DIGITAL_UP)
@@ -130,12 +128,13 @@ void initializeSubsystems(){
             ->andThen(new WaitCommand(150_msec))
         );
 
-        
     primary.getTrigger(DIGITAL_B)
-        ->onTrue(
+        ->toggleOnTrue(
             claw->levelCommand(false)
-            ->andThen( new WaitCommand(7_sec) )
-            ->andThen(claw->levelCommand(true))
+            ->andThen( new WaitCommand(150_msec) )
+        )
+        ->toggleOnFalse(
+            claw->levelCommand(true)
             ->andThen(resetArmLift)
         );
 
@@ -149,17 +148,31 @@ void initializeSubsystems(){
     
     primary.getTrigger(DIGITAL_DOWN)
     ->toggleOnTrue(
-            toggleFlippers->mainLevelCommand(false)
+            toggleFlippers->levelCommand(false)
             ->andThen( new WaitCommand(150_sec) )
         )
     ->toggleOnFalse(
-            toggleFlippers->mainLevelCommand(true)
+            toggleFlippers->levelCommand(true)
             ->andThen( new WaitCommand(150_sec) )
         );
 
     primary.getTrigger(DIGITAL_Y)
         ->toggleOnTrue( claw->levelCommand(true)->andThen(new WaitCommand(150_msec)) )
         ->toggleOnFalse( arm->positionCommand(25, 1.0) );
+
+    
+    primary.getTrigger(DIGITAL_A)
+    ->toggleOnTrue(
+            toggleFlippers->swiperAndRightCommand(false, from_msec(pros::millis()))
+                ->andThen( new WaitCommand(150_sec) )
+        )
+    ->toggleOnFalse(
+            toggleFlippers->swiperLevelCommand(true)
+            ->andThen(new WaitCommand(1000_msec))
+            ->andThen(toggleFlippers->rightLevelCommand(true))
+            ->andThen( new WaitCommand(150_sec) )
+        );
+
 
     primary.getTrigger(DIGITAL_R1)
     ->andOther(primary.getTrigger(DIGITAL_B)->negate())
@@ -179,20 +192,6 @@ void initializeSubsystems(){
             ->andThen(new WaitCommand(150_msec))
         );
 
-    primary.getTrigger(DIGITAL_A)
-    ->toggleOnTrue(
-            toggleFlippers->swiperAndRightCommand(true)
-                ->andThen( new WaitCommand(150_sec) )
-            ->andThen(toggleFlippers->swiperLevelCommand(false))
-                ->andThen( new WaitCommand(150_sec) )
-            ->andThen(toggleFlippers->swiperAndRightCommand(false))->andThen( new WaitCommand(150_sec) )
-        )
-    ->toggleOnFalse(
-            toggleFlippers->swiperLevelCommand(true)
-            ->andThen(new WaitCommand(1000_msec))
-            ->andThen(toggleFlippers->rightLevelCommand(true))
-            ->andThen( new WaitCommand(150_sec) )
-        );
 
     primary.getTrigger(DIGITAL_L1)
     ->andOther(primary.getTrigger(DIGITAL_B)->negate())
@@ -205,14 +204,16 @@ void initializeSubsystems(){
         
     primary.getTrigger(DIGITAL_L2)
     ->andOther(primary.getTrigger(DIGITAL_B)->negate())
-        ->toggleOnFalse(
+        ->toggleOnTrue(
             claw->levelCommand(true)
-            ->andThen(scorePos3)->andThen(new WaitCommand(50_msec))
-            ->andThen(lift->holdPositionCommand())//->andThen(arm->holdPositionCommand())
+            ->andThen(lift->positionCommand(4.5_in, 3.0_cm))
+            ->andThen(lift->holdPositionCommand())
+        )
+        ->toggleOnFalse(
+            (scorePos3)->andThen(new WaitCommand(50_msec))
+            ->andThen(arm->holdPositionCommand()->with(lift->holdPositionCommand()))
             ->andThen(new WaitCommand(150_msec))
         );
-
-    resetArmLift->schedule();
 
     printf("\nSubsystems have been set up!\n\n");
 }

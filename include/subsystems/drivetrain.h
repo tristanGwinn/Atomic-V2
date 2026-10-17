@@ -32,6 +32,13 @@ class DriveSubsystem : public Subsystem {
         Pose pose = {0_m, 0_m, 0_stDeg};
 
         std::optional<double> target_angle;
+        std::optional<Length> pid_target;
+
+        PID pid = config::lateral_pid;
+
+        Pose start_pose = pose;
+        Time start_time = from_msec(pros::millis());
+        Time current_time = from_msec(pros::millis());
 
     public:
         explicit DriveSubsystem(MotorGroup &leftmotors, MotorGroup &rightmotors, 
@@ -61,7 +68,16 @@ class DriveSubsystem : public Subsystem {
         void periodic() override {
             if(track_odom) {
                 updateOdom();
-                // sendOdomDebug();    // print odom data to pros brain terminal
+	            this->sendOdomDebug();
+                
+                /*
+                if (pid_target.has_value()){
+                    const auto error = this->getPose().distanceTo( 
+                            this->start_pose + units::V2Position::fromPolar(this->start_pose.orientation + 90_stDeg, pid_target.value()) 
+                        );
+                    const auto control_out = pid.update(to_in(error)) / 100;
+                    setPct(control_out, control_out);
+                }*/
             }
         }
 
@@ -171,6 +187,10 @@ class DriveSubsystem : public Subsystem {
             right_motors.move( sum <= 1.0 ? right_out : right_out / sum );
         }
 
+        void setPidTarget(Length distance) {
+            this->pid_target = distance;
+            pid.setTarget(to_in(pid_target.value()));
+        }
 
         /**
          * based on the expo curve from lemlib.
@@ -201,6 +221,34 @@ class DriveSubsystem : public Subsystem {
         void setPct(const double pct_left, const double pct_right) {
             this->left_motors.move(pct_left);
             this->right_motors.move(pct_right);
+        }
+
+        FunctionalCommand* lateralPidCommand(Length distance, Time timeout = 5_sec, Length tolerance = config::default_tolerance){
+
+        return new FunctionalCommand(
+            [this, distance, tolerance]() { 
+                         this->start_time = from_msec(pros::millis());
+                         this->start_pose = this->getPose();
+                         this->setPidTarget(distance);
+                                     std::cout << "The drivetrain target position is set to " << units::V2Position::fromPolar(this->start_pose.orientation + 90_stDeg, distance).x << ", "
+                      <<  units::V2Position::fromPolar(this->start_pose.orientation + 90_stDeg, distance).y
+                      << " forward/reverse with a tolerance of " << to_in(tolerance) << std::endl;
+
+                     }, [this, distance]() { 
+                         this->current_time = from_msec(pros::millis());
+                         this->setPidTarget(distance);
+
+                     }, [this](bool _) {
+                         this->pid_target = std::nullopt;
+                         this->pct = std::nullopt;
+                         printf("The drivetrain is within tolerence of its target.\n");
+
+                     }, [this, distance, timeout, tolerance]() {
+                         const auto error = this->getPose().distanceTo( this->start_pose + units::V2Position::fromPolar(this->start_pose.orientation + 90_stDeg, distance) );
+                         std::cout << "Drivetrain error (inches): " << to_in(error) << std::endl;
+                         return 
+                            (error < tolerance) || (this->current_time - this->start_time >= timeout);
+                     }, {this});
         }
 
         RunCommand* pctCommand(const double left, const double right) {

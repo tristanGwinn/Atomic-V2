@@ -40,8 +40,9 @@ class Ramsete : public Command {
             const auto targetState = trajectory->sample(from_msec(pros::millis()) - startTime);
             auto currentPose = drivetrain->getPose();
             auto desiredPose = targetState.pose;
-            
             if(reversed) desiredPose.orientation += 180_stDeg;
+            desiredPose.orientation += 90_stDeg;
+
             const auto desiredOmega = reversed ? -targetState.angularVelocity : targetState.angularVelocity;
             const auto desiredV = reversed ? -targetState.linearVelocity : targetState.linearVelocity;
 

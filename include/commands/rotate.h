@@ -23,7 +23,8 @@ public:
            const bool finish = true)
         : drivetrain(drivetrain),
           static_voltage(static_voltage),
-          finish(finish), updateAngle([flip, angle]() { return (flip ? -1.0f : 1.0f) * angle; }) {
+          finish(finish), 
+          updateAngle([flip, angle]() { return (flip ? -1.0f : 1.0f) * angle; }) {
     }
 
     Rotate(DriveSubsystem *drivetrain, const std::function<Angle()> &updateAngle, const bool flip,
@@ -31,7 +32,8 @@ public:
            const bool finish = true)
         : drivetrain(drivetrain),
           static_voltage(static_voltage),
-          finish(finish), updateAngle([flip, updateAngle] () { return (flip ? -1.0f : 1.0f) * updateAngle(); }) {
+          finish(finish),
+          updateAngle([flip, updateAngle] () { return (flip ? -1.0f : 1.0f) * updateAngle(); }) {
     }
 
     void initialize() override {
@@ -47,7 +49,7 @@ public:
     bool isFinished() override {
         return (
             finish && 
-            abs(this->drivetrain->getPose().orientation - config::angular_pid.getTarget()*rad) < config::angle_tolerance
+            abs(this->drivetrain->getPose().orientation - updateAngle()) < config::angle_tolerance
         );
     }
 

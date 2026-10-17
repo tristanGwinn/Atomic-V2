@@ -27,14 +27,14 @@ class ClawSubsystem : public Subsystem {
         bool isCupDetected = false;
         bool primedToClamp = false;
 
-        bool lastValue = true;
-        bool isClawClamped = false;
+        bool lastValue = false;
+        bool isClawClamped = true;
 
     public:
         
         explicit ClawSubsystem(pros::adi::DigitalOut &solenoid, pros::v5::Distance &dist)
         : solenoid(solenoid), distance(dist) {
-            // prolly dont need anything here
+            solenoid.set_value(true);
         }
 
         void periodic() override {
