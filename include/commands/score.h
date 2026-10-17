@@ -8,9 +8,7 @@
 #include "command/parallelCommandGroup.h"
 #include "command/sequence.h"
 
-#include "subsystems/lift.h"
-#include "subsystems/arm.h"
-#include "subsystems/claw.h"
+#include "subsystems/subsystems.h"
 
 /**
  * this command will wait until the claw detects

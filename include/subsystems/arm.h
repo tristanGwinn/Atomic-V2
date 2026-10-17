@@ -44,7 +44,7 @@ class ArmSubsystem : public Subsystem {
             position = this->getPosition();
             
             // this is a really gross way to do this, but wtv
-            if (!pos_offset.has_value() && (fabs(position - prev_position) < max_init_delta && position > 26.0)) {
+            if (!pos_offset.has_value() && (fabs(position - prev_position) < max_init_delta && position > 19.0)) {
                 pos_offset = position;
             }
             prev_position = position;

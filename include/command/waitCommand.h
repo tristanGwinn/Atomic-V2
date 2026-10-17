@@ -34,7 +34,7 @@ public:
 	 * @return Returns true if the duration has passed, false otherwise
 	 */
 	bool isFinished() override {
-		return pros::millis() * msec - startTime > duration;
+		return from_msec(pros::millis()) - startTime > duration;
 	}
 
 	~WaitCommand() override = default;
