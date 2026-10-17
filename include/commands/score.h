@@ -37,9 +37,11 @@ class Score : public Command {
             printf("Moving arm and lift to scoring positions ...\n");
         }
 
-
         // before writing this, move to position functionality to the cascade lift subsystem
-        void execute() override { }
+        void execute() override { 
+            lift->setTarget(from_in(score_positions[1]));
+            arm->setTarget(score_positions[0]);
+        }
 
         bool arePositionsTolerable() {
             return (
@@ -50,8 +52,8 @@ class Score : public Command {
         bool isFinished() override { return arePositionsTolerable(); }
 
         void end(bool interupted) override { 
-            lift->brakeMotors(BrakeMode::HOLD);
-            arm->brakeMotors(BrakeMode::HOLD);
+            // lift->brakeMotors(BrakeMode::HOLD);
+            // arm->brakeMotors(BrakeMode::HOLD);
             std::cout << "Score command finished!\n" << std::endl;    
         }
 

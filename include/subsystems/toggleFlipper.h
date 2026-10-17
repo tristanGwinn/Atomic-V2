@@ -49,12 +49,13 @@ class ToggleSubsystem : public Subsystem {
                 [this, value]() { 
                     this->setLevelLeft(value); 
                     this->setLevelRight(value);  
-                    this->setLevelSwiper(!value);
+                    this->setLevelSwiper(value);
+                    printf("set all toggles\n");
                 }, 
                 [this, value]() {
                     this->setLevelLeft(value); 
                     this->setLevelRight(value);  
-                    this->setLevelSwiper(!value);
+                    this->setLevelSwiper(value);
                 }, [this](bool _) { },
                 [this]() { return true; },
                 {this}
@@ -76,6 +77,21 @@ class ToggleSubsystem : public Subsystem {
             );
         }
 
+        FunctionalCommand *swiperAndRightCommand(bool value) {
+            return new FunctionalCommand(
+                [this, value]() { 
+                    this->setLevelSwiper(value); 
+                    this->setLevelRight(value); 
+                }, 
+                [this, value]() {
+                    this->setLevelSwiper(value); 
+                    this->setLevelRight(value); 
+                }, [this](bool _) { },
+                [this]() { return true; },
+                {this}
+            );
+        }
+
         FunctionalCommand *swiperLevelCommand(bool value) {
             return new FunctionalCommand(
                 [this, value]() { 
@@ -89,13 +105,13 @@ class ToggleSubsystem : public Subsystem {
             );
         }
 
-        FunctionalCommand *leftLevelCommand(bool value) {
+        FunctionalCommand *rightLevelCommand(bool value) {
             return new FunctionalCommand(
                 [this, value]() { 
-                    this->setLevelSwiper(value); 
+                    this->setLevelRight(value); 
                 }, 
                 [this, value]() {
-                    this->setLevelSwiper(value); 
+                    this->setLevelRight(value); 
                 }, [this](bool _) { },
                 [this]() { return true; },
                 {this}
