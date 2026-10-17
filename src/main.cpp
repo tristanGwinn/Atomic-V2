@@ -81,4 +81,6 @@ void autonomous() {
 	followTestTrajectory->schedule();*/
 }
 
-void opcontrol() {}
+void opcontrol() {
+	toggleFlippers->setLevelSwiper(true);
+}

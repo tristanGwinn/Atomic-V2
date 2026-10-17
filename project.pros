@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Atomic-V2",
+    "project_name": "Atomic-V2 ",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -592,7 +592,7 @@
       }
     },
     "upload_options": {
-      "description": "10-13-2026",
+      "description": "10-17-2026",
       "icon": "pros",
       "slot": 1
     },
