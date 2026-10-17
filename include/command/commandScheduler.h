@@ -123,7 +123,7 @@ class CommandScheduler {
             instance.eventLoop.poll(); 
 
             // Only poll teleop tasks when the robot controller is active
-            if (!pros::competition::is_autonomous() && ! pros::competition::is_disabled()) {
+            if (!pros::competition::is_autonomous() && !pros::competition::is_disabled()) {
                 instance.teleopEventLoop.poll(); 
             }
 

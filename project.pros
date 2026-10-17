@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Atomic-V2 ",
+    "project_name": "TOGGLE Atomic-V2",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -593,8 +593,8 @@
     },
     "upload_options": {
       "description": "10-17-2026",
-      "icon": "pros",
-      "slot": 1
+      "icon": "clawbot",
+      "slot": 2
     },
     "use_early_access": false
   }

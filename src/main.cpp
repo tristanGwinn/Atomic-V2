@@ -20,11 +20,13 @@
 
 #include "main.h"
 #include "pros/imu.hpp"
-#include "config.hpp"
-
-#include "subsystems/subsystems.h"
-
 #include "pros/llemu.hpp"
+
+#include "config.hpp"
+#include "subsystems/subsystems.h"
+#include "autonomous/autonomousCommands.h"
+
+Command* autonCommand;
 
 // brain image stuff
 LV_IMAGE_DECLARE(logo);
@@ -43,6 +45,13 @@ void initialize() {
     // setup and register subsystems and setup triggers
     initializeSubsystems();
 
+	// just in case lmao
+    claw->levelCommand(true)->schedule();   // clamp at the end of setup
+	toggleFlippers->levelCommand(false);   // set flippers downs
+
+
+	autonCommand = AutonomousCommands::getAuton();
+
 	primary.rumble("...-");
 
 }
@@ -52,35 +61,10 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-
-	auto turningTest = new Sequence({
-		(new Rotate(drivetrain, 90_stDeg, false, 0.0, false))->withTimeout(3_sec),
-		(new Rotate(drivetrain, 0_stDeg, false, 0.0, false))->withTimeout(3_sec),
-		(new Rotate(drivetrain, 180_stDeg, false, 0.0, false))->withTimeout(3_sec)
-	});
-
-	turningTest->schedule();
-
-	/*printf("testing Ramsete\n");
-
-  	CubicBezier *testPath;
-  	testPath = new CubicBezier({0_in, 0_in}, {0_in, 6_in}, {36_in, 18_in}, {48_in, 36_in});
-    printf("test path created\n");
-
-  	TrajectoryGenerator generator(config::robot_kinematics, 0.7_in);
-    printf("generator created\n");
-
-  	generator.generateTrajectory(testPath);
-
-	auto pathTrajectory = new Trajectory(generator.getTrajectory());
-	// std::cout << "Total path time: " << pathTrajectory->totalTime().internal() << " sec" << std::endl;
-
-    Ramsete* followTestTrajectory = new Ramsete(drivetrain, pathTrajectory, config::ramsete_tolerance, 0.7, 1.0);
-	
-	(new Rotate(drivetrain, pathTrajectory->initialPose().orientation, false))->schedule();
-	followTestTrajectory->schedule();*/
+    CommandScheduler::schedule(autonCommand);
 }
 
 void opcontrol() {
-	toggleFlippers->setLevelSwiper(true);
+    autonCommand->cancel();
+	// toggleFlippers->setLevelSwiper(true);
 }

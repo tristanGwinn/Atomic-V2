@@ -17,7 +17,7 @@ class ArmSubsystem : public Subsystem {
         pros::Imu imu;
         pros::Imu chassis_imu;
 
-        double max_init_delta = 0.001;    // this should be pretty low
+        double max_init_delta = 0.0006;    // this should be pretty low
         double prev_position = 0;
 
         std::optional<double> pos_offset;
@@ -46,21 +46,18 @@ class ArmSubsystem : public Subsystem {
             // this is a really gross way to do this, but wtv
             if (!pos_offset.has_value() && (fabs(position - prev_position) < max_init_delta && position > 19.0)) {
                 pos_offset = position;
+                printf("CONFIGURED ARM: %f \n", pos_offset);
             }
             prev_position = position;
 
             if (!voltage.has_value() && target.has_value()) {
                 const auto control_out = pid.update(position);
 
-                // if (position < 4 && target.value() < 22 && target.value() - position > 2) motor.move( control_out * 1.15 / 100 );
-                // else motor.move( control_out / 100);
                 motor.move( control_out / 100);
 
-                printf("arm position: %f \n", position);
+                // printf("arm position: %f \n", position);
                 // printf("arm error: %f \n", position.value() - target.value());
                 // printf("arm control output: %f \n", control_out.internal());
-                // if (position - pos_offset.value_or(0) > 185 && target.value() - pos_offset.value_or(0) > 180) motor.move( clamp(control_out / 100, -0.2, 0.2) );
-                // else motor.move( clamp(control_out / 100, -0.8, 0.8) );
             }
         }
 

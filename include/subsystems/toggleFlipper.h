@@ -50,7 +50,6 @@ class ToggleSubsystem : public Subsystem {
                     this->setLevelLeft(value); 
                     this->setLevelRight(value);  
                     this->setLevelSwiper(value);
-                    printf("set all toggles\n");
                 }, 
                 [this, value]() {
                     this->setLevelLeft(value); 
@@ -77,15 +76,15 @@ class ToggleSubsystem : public Subsystem {
             );
         }
 
-        FunctionalCommand *swiperAndRightCommand(bool value) {
+        FunctionalCommand *swiperAndRightCommand(bool value, Time startTime) {
             return new FunctionalCommand(
                 [this, value]() { 
                     this->setLevelSwiper(value); 
-                    this->setLevelRight(value); 
                 }, 
-                [this, value]() {
+                [this, value, startTime]() {
                     this->setLevelSwiper(value); 
-                    this->setLevelRight(value); 
+                    if (from_msec(pros::millis()) - startTime > 1500_msec)
+                        this->setLevelRight(value); 
                 }, [this](bool _) { },
                 [this]() { return true; },
                 {this}
